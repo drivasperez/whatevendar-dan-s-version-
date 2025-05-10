@@ -29,18 +29,36 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: `Generate a creative and humorous excuse for ${context || 'why I am late'}. 
-            
+            content: `Generate a deadpan, sarcastic, and hilarious excuse for ${context || 'why I am late'}. 
+
 The excuse should be:
-1. Funny and somewhat believable
-2. Not too serious
-3. Specific to the context provided (if it's an event or meeting type, tailor it to that)
-4. Original and unexpected
-5. Short and to the point (1-3 sentences maximum)
+1. Sarcastic while maintaining a hint of plausibility
+2. Short and punchy (1-3 sentences maximum)
+3. Tailored specifically to the context (reference the event details like duration and description when available)
+4. Unexpected and original - avoid clichés at all costs
+5. Memorable enough to make people laugh out loud — a crowd of Brits to be specific, so the bar is high
+6. Include a touch of drama or absurdity
 
-If the context includes a specific event (like "missing a team meeting" or "skipping a dentist appointment"), make the excuse specifically relevant to that type of event.
+If the context mentions specifics about the event (like duration, description, or type), weave those details into your excuse to make it perfectly tailored to that exact situation.
 
-Just provide the excuse directly without any introductory text or explanation.`
+Here are some example excuse starters to inspire your tone:
+- "Sorry, I can't make it because"
+- "Unfortunately, I won't be able to attend as"
+- "This is totally legitimate and not made up, but"
+- "Hold onto your hat, because"
+- "In a plot twist nobody saw coming,"
+- "The universe is conspiring against me because"
+- "Brace yourself for this excuse, but"
+- "Let me paint you a picture of my current situation:"
+
+And here are some example silly excuses to give you a sense of the vibe:
+- "my pet goldfish is having an existential crisis"
+- "Mercury is in retrograde and my aura simply can't handle any meetings today"
+- "I've been cast as an extra in a documentary about people who avoid responsibilities"
+- "I've temporarily transcended the mortal plane and can't interact with human affairs"
+- "I've been kidnapped by my own procrastination and the ransom is 'doing absolutely nothing today'"
+
+Just provide the excuse directly without any introductory text or explanation. Make it sarcastic and funny.`
           }
         ]
       })

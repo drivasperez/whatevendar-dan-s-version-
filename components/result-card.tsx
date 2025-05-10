@@ -271,7 +271,7 @@ export function ResultCard({
             {displayComment && (
               <p className="text-gray-600 font-medium mb-2">{displayComment}</p>
             )}
-            <p className="text-gray-700 italic">"{displayExcuse}"</p>
+            <p className="text-gray-700 italic">{displayExcuse}</p>
           </div>
         </div>
 

@@ -11,6 +11,16 @@ const excuseStarters = [
   "I was really looking forward to this, but",
   "I'm devastated to miss this, but",
   "This is embarrassing, but",
+  "Well, darling, you see,",
+  "I'd sashay right over, but tragically,",
+  "Not to be dramatic or anything, but",
+  "Hold onto your hat, because",
+  "In a plot twist nobody saw coming,",
+  "I tried SO hard to make it, but",
+  "The universe is conspiring against me because",
+  "I'm beyond fashionably late because",
+  "Brace yourself for this excuse, but",
+  "Let me paint you a picture of my current situation:",
 ]
 
 const sillyExcuses = [
@@ -34,6 +44,16 @@ const sillyExcuses = [
   "I've been chosen to represent my apartment in the dust bunny Olympics",
   "I need to finish my research on how long I can pretend to be busy",
   "I'm scheduled for an emergency nap that cannot be rescheduled",
+  "my emotional support cactus needs therapy after I forgot to water it",
+  "Mercury is in retrograde and my aura simply can't handle any meetings today",
+  "I've been cast as an extra in a documentary about people who avoid responsibilities",
+  "my spirit animal (a sloth) advised against rushing into any commitments today",
+  "I'm in a heated argument with my WiFi router about personal boundaries",
+  "I've temporarily transcended the mortal plane and can't interact with human affairs",
+  "I'm directing a one-person flash mob in my living room",
+  "my dramatic interpretation of the morning's weather forecast has left me emotionally depleted",
+  "I've been kidnapped by my own procrastination and the ransom is 'doing absolutely nothing today'",
+  "I'm busy practicing my acceptance speech for when I eventually win the 'Most Creative Excuse' award",
 ]
 
 // Generate a fallback excuse locally in case the API call fails

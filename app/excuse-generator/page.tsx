@@ -36,10 +36,10 @@ export default function ExcuseGenerator() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md space-y-6 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-          Excuse Generator
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 dark:from-pink-900 dark:via-purple-900 dark:to-indigo-950">
+      <div className="w-full max-w-md space-y-6 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border-2 border-purple-200 dark:border-purple-700">
+        <h1 className="text-3xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-300 dark:to-pink-300">
+          ✨ Excuse Fabricator ✨
         </h1>
         
         <div className="space-y-4">
