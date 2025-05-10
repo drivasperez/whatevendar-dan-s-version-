@@ -1,67 +1,113 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
-import type { CalendarEvent, EventDecision } from "@/types/events"
-import { generateTestEvents } from "@/lib/mock-data"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
+import type { CalendarEvent } from "@/types/events"
+
+interface Decision {
+  eventId: string
+  event: CalendarEvent
+  decision: "declined" | "maybe" | "maybe-declined"
+  reason: string
+  timestamp: string
+}
 
 interface EventsContextType {
   events: CalendarEvent[]
-  decisions: EventDecision[]
-  addDecision: (decision: EventDecision) => void
+  currentEvent: CalendarEvent | null
+  decisions: Decision[]
+  addDecision: (decision: Decision) => void
   clearDecisions: () => void
   resetEvents: () => void
+  hasMoreEvents: boolean
 }
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined)
 
-export function EventsProvider({ children }: { children: ReactNode }) {
+export function EventsProvider({ children }: { children: React.ReactNode }) {
   const [events, setEvents] = useState<CalendarEvent[]>([])
-  const [decisions, setDecisions] = useState<EventDecision[]>([])
+  const [currentEvent, setCurrentEvent] = useState<CalendarEvent | null>(null)
+  const [decisions, setDecisions] = useState<Decision[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasMoreEvents, setHasMoreEvents] = useState(true)
 
-  // Load mock events on mount
-  useEffect(() => {
-    // Use the test events for more consistent dates
-    setEvents(generateTestEvents())
-
-    // Load decisions from localStorage if available
-    const savedDecisions = localStorage.getItem("eventDecisions")
-    if (savedDecisions) {
-      try {
-        setDecisions(JSON.parse(savedDecisions))
-      } catch (e) {
-        console.error("Failed to parse saved decisions", e)
+  // Load events from API
+  const loadEvents = useCallback(async () => {
+    if (isLoading || !hasMoreEvents) return // Prevent concurrent loads and unnecessary reloads
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/calendar/events')
+      const data = await response.json()
+      if (data.events) {
+        // Filter out events that have already been decided
+        const decidedEventIds = new Set(decisions.map(d => d.eventId))
+        const newEvents = data.events.filter((event: CalendarEvent) => !decidedEventIds.has(event.id))
+        
+        setEvents(newEvents)
+        setCurrentEvent(newEvents[0] || null)
+        setHasMoreEvents(newEvents.length > 0)
       }
+    } catch (error) {
+      console.error('Error loading events:', error)
+    } finally {
+      setIsLoading(false)
     }
-  }, [])
+  }, [isLoading, hasMoreEvents, decisions])
 
-  // Save decisions to localStorage when they change
+  // Move to next event
+  const moveToNextEvent = useCallback(() => {
+    if (events.length <= 1) {
+      setCurrentEvent(null)
+      setHasMoreEvents(false)
+      return
+    }
+
+    // Remove the current event and set the next one
+    const newEvents = events.slice(1)
+    setEvents(newEvents)
+    setCurrentEvent(newEvents[0])
+  }, [events])
+
+  // Load events initially
   useEffect(() => {
-    if (decisions.length > 0) {
-      localStorage.setItem("eventDecisions", JSON.stringify(decisions))
+    if (events.length === 0 && hasMoreEvents) {
+      loadEvents()
     }
-  }, [decisions])
+  }, [events.length, hasMoreEvents, loadEvents])
 
-  // Add decision and remove event from events list
-  const addDecision = useCallback((decision: EventDecision) => {
-    // Add to decisions history
-    setDecisions((prev) => [decision, ...prev])
+  const addDecision = (decision: Decision) => {
+    setDecisions((prev) => [...prev, decision])
+    // Move to the next event
+    moveToNextEvent()
+  }
 
-    // Remove the event from the events list
-    setEvents((prev) => prev.filter((event) => event.id !== decision.eventId))
-  }, [])
-
-  const clearDecisions = useCallback(() => {
+  const clearDecisions = () => {
     setDecisions([])
-    localStorage.removeItem("eventDecisions")
-  }, [])
+    setHasMoreEvents(true) // Reset the flag when clearing decisions
+  }
 
-  // Reset events for testing
   const resetEvents = useCallback(() => {
-    setEvents(generateTestEvents())
-  }, [])
+    // Only reset if we have no more events
+    if (!hasMoreEvents) {
+      setEvents([])
+      setCurrentEvent(null)
+      setHasMoreEvents(true)
+      loadEvents()
+    }
+  }, [hasMoreEvents, loadEvents])
 
   return (
-    <EventsContext.Provider value={{ events, decisions, addDecision, clearDecisions, resetEvents }}>
+    <EventsContext.Provider
+      value={{
+        events,
+        currentEvent,
+        decisions,
+        addDecision,
+        clearDecisions,
+        resetEvents,
+        hasMoreEvents,
+      }}
+    >
       {children}
     </EventsContext.Provider>
   )

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Calendar, ClockIcon, History } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "./mode-toggle"
+import { CalendarAuth } from "./calendar-auth"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -46,6 +47,7 @@ export default function Navbar() {
               <History className="h-5 w-5 mr-1" />
               <span className="hidden sm:inline">History</span>
             </Link>
+            <CalendarAuth />
             <ModeToggle />
           </div>
         </div>

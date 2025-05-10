@@ -7,6 +7,8 @@ import type { CalendarEvent } from "@/types/events"
 import { cn } from "@/lib/utils"
 import { Calendar, Clock, MapPin, Check, X, HelpCircle } from "lucide-react"
 import { useTheme } from "next-themes"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { format } from "date-fns"
 
 interface EventCardProps {
   event: CalendarEvent
@@ -164,131 +166,41 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
     },
   )
 
-  // Format date for display
-  const eventDate = new Date(event.startTime)
-  const formattedDate = eventDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  })
-  const formattedTime = eventDate.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-
   return (
-    <animated.div
-      className={cn(
-        "swipe-card",
-        swipeDirection === "left" && "swipe-left",
-        swipeDirection === "right" && "swipe-right",
-        swipeDirection === "up" && "swipe-up",
-        swiped && "pointer-events-none",
-      )}
-      style={{
-        x,
-        y,
-        rotate,
-        scale,
-        zIndex: active ? 5 : 5 - index,
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        touchAction: "none", // Prevent browser handling of touch gestures
-        willChange: "transform", // Hint to browser to optimize transforms
-      }}
-      {...(active && !swiped ? bind() : {})}
-    >
-      <div
-        className={cn(
-          "swipe-card-content",
-          isDark ? "glass-card-dark" : "glass-card",
-          "flex flex-col justify-between shadow-lg",
-        )}
-      >
-        {/* New indicator design positioned at top corners */}
-        <div className="swipe-indicator">
-          <div
-            className="swipe-indicator-item swipe-indicator-left"
-            style={{
-              opacity: swipeDirection === "left" ? 1 : 0,
-              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
-            }}
-          >
-            <div className="indicator-icon decline-icon">
-              <X className="h-5 w-5 text-white" />
-            </div>
-          </div>
-
-          <div
-            className="swipe-indicator-item swipe-indicator-up"
-            style={{
-              opacity: swipeDirection === "up" ? 1 : 0,
-              transform: `translateX(-50%) scale(${getIndicatorScale(
-                "up",
-                swipeDirection === "up" ? positionRef.current.y : 0,
-              )})`,
-            }}
-          >
-            <div className="indicator-icon maybe-icon">
-              <HelpCircle className="h-5 w-5 text-white" />
-            </div>
-          </div>
-
-          <div
-            className="swipe-indicator-item swipe-indicator-right"
-            style={{
-              opacity: swipeDirection === "right" ? 1 : 0,
-              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
-            }}
-          >
-            <div className="indicator-icon accept-icon">
-              <Check className="h-5 w-5 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <span className="event-type-badge">{event.type}</span>
-        </div>
-
-        <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
-
-        <div className="card-divider"></div>
-
-        <div className="grid grid-cols-1 gap-2 mb-6 w-full">
-          <div className="info-item">
-            <div className="info-item-icon">
-              <Calendar className="h-4 w-4" />
-            </div>
-            <span className="text-gray-700 dark:text-gray-300">{formattedDate}</span>
-          </div>
-          <div className="info-item">
-            <div className="info-item-icon">
-              <Clock className="h-4 w-4" />
-            </div>
-            <span className="text-gray-700 dark:text-gray-300">{formattedTime}</span>
-          </div>
-          {event.location && (
-            <div className="info-item">
-              <div className="info-item-icon">
-                <MapPin className="h-4 w-4" />
-              </div>
-              <span className="text-gray-700 dark:text-gray-300">{event.location}</span>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>{event.title}</CardTitle>
+        <CardDescription>
+          {format(new Date(event.startTime), "EEEE, MMMM d, yyyy 'at' h:mm a")}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {event.description && (
+            <div>
+              <h4 className="font-semibold mb-1">Description</h4>
+              <p className="text-sm text-muted-foreground">{event.description}</p>
             </div>
           )}
-        </div>
-
-        {event.description && (
-          <div className="description-box mb-4">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">{event.description}</p>
+          {event.location && (
+            <div>
+              <h4 className="font-semibold mb-1">Location</h4>
+              <p className="text-sm text-muted-foreground">{event.location}</p>
+            </div>
+          )}
+          <div>
+            <h4 className="font-semibold mb-1">Duration</h4>
+            <p className="text-sm text-muted-foreground">
+              {format(new Date(event.startTime), "h:mm a")} -{" "}
+              {format(new Date(event.endTime), "h:mm a")}
+            </p>
           </div>
-        )}
-
-        <div className="swipe-instructions">Swipe left to decline, right to accept, or up for maybe</div>
-      </div>
-    </animated.div>
+          <div>
+            <h4 className="font-semibold mb-1">Type</h4>
+            <p className="text-sm text-muted-foreground">{event.type}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
