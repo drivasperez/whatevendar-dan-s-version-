@@ -1,0 +1,206 @@
+"use client"
+
+import { useState } from "react"
+import { animated, useSpring } from "@react-spring/web"
+import { useDrag } from "@use-gesture/react"
+import type { CalendarEvent } from "@/types/events"
+import { cn } from "@/lib/utils"
+import { Calendar, Clock, MapPin } from "lucide-react"
+import { useTheme } from "next-themes"
+
+interface EventCardProps {
+  event: CalendarEvent
+  onSwipe: (direction: "left" | "right" | "up", event: CalendarEvent) => void
+  active: boolean
+  index: number
+}
+
+export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
+  const { theme } = useTheme()
+  const isDark = theme === "dark"
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | "up" | null>(null)
+  const [swiped, setSwiped] = useState(false)
+
+  // Set up spring for the card with more responsive settings
+  const [{ x, y, rotate, scale }, api] = useSpring(() => ({
+    x: 0,
+    y: 0,
+    rotate: 0,
+    scale: active ? 1 : 0.9,
+    // Use a more responsive config for immediate feedback
+    config: { tension: 500, friction: 25, mass: 0.5 },
+  }))
+
+  // Set up drag gesture with immediate response
+  const bind = useDrag(
+    ({ down, movement: [mx, my], last, velocity }) => {
+      // Don't process if card has already been swiped
+      if (swiped) return
+
+      // Determine swipe direction based on movement
+      const swipeThreshold = 80 // Lower threshold to make swiping easier
+      const isSwipingLeft = mx < -swipeThreshold
+      const isSwipingRight = mx > swipeThreshold
+      const isSwipingUp = my < -swipeThreshold
+
+      // Determine direction for visual indicator
+      let dir: "left" | "right" | "up" | null = null
+      if (Math.abs(mx) > Math.abs(my)) {
+        dir = mx < 0 ? "left" : "right"
+      } else if (my < 0) {
+        dir = "up"
+      }
+
+      // Update swipe direction indicator
+      setSwipeDirection(dir)
+
+      // If we're not holding down and we've moved enough in a direction, trigger swipe
+      if (!down && last) {
+        if (isSwipingLeft || isSwipingRight || isSwipingUp) {
+          // Mark as swiped to prevent further interactions
+          setSwiped(true)
+
+          // Determine final swipe direction
+          let finalDirection: "left" | "right" | "up"
+          if (isSwipingUp) {
+            finalDirection = "up"
+          } else {
+            finalDirection = isSwipingLeft ? "left" : "right"
+          }
+
+          // Animate the card off screen with velocity for natural feel
+          const xDest = finalDirection === "left" ? -2000 : finalDirection === "right" ? 2000 : 0
+          const yDest = finalDirection === "up" ? -2000 : 0
+          const rotation = finalDirection === "left" ? -30 : finalDirection === "right" ? 30 : 0
+
+          api.start({
+            x: xDest,
+            y: yDest,
+            rotate: rotation,
+            config: {
+              friction: 50,
+              tension: 200,
+              velocity: [velocity[0] * 2, velocity[1] * 2], // Use velocity for more natural animation
+            },
+            onRest: () => {
+              // Call onSwipe after the animation completes
+              onSwipe(finalDirection, event)
+            },
+          })
+          return
+        } else {
+          // If not swiping far enough, reset position
+          api.start({
+            x: 0,
+            y: 0,
+            rotate: 0,
+            scale: active ? 1 : 0.9,
+            config: { tension: 500, friction: 30 },
+          })
+          setSwipeDirection(null)
+        }
+      }
+
+      // Update card position and rotation during drag - use immediate: true for 1:1 movement
+      if (down) {
+        api.start({
+          x: mx,
+          y: my,
+          rotate: mx / 15, // Reduced rotation for more natural feel
+          scale: 1.02, // Subtle scale effect
+          immediate: true, // This is key for 1:1 movement with the mouse
+        })
+      }
+    },
+    {
+      enabled: active && !swiped,
+      // Add these options for more responsive dragging
+      filterTaps: true,
+      rubberband: true,
+      initial: [0, 0],
+    },
+  )
+
+  // Format date for display
+  const eventDate = new Date(event.startTime)
+  const formattedDate = eventDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  })
+  const formattedTime = eventDate.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+
+  return (
+    <animated.div
+      className={cn(
+        "swipe-card",
+        swipeDirection === "left" && "swipe-left",
+        swipeDirection === "right" && "swipe-right",
+        swipeDirection === "up" && "swipe-up",
+        swiped && "pointer-events-none",
+      )}
+      style={{
+        x,
+        y,
+        rotate,
+        scale,
+        zIndex: active ? 5 : 5 - index,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        touchAction: "none", // Prevent browser handling of touch gestures
+      }}
+      {...(active && !swiped ? bind() : {})}
+    >
+      <div
+        className={cn(
+          "swipe-card-content",
+          isDark ? "glass-card-dark" : "glass-card",
+          "flex flex-col justify-between shadow-lg",
+        )}
+      >
+        <div className="swipe-indicator">
+          <div className="swipe-indicator-item swipe-indicator-left">Decline</div>
+          <div className="swipe-indicator-item swipe-indicator-up">Maybe</div>
+          <div className="swipe-indicator-item swipe-indicator-right">"Accept"</div>
+        </div>
+
+        <div className="mb-4">
+          <span className="inline-block px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 text-xs font-medium">
+            {event.type}
+          </span>
+        </div>
+
+        <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
+
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center justify-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <span className="text-gray-700 dark:text-gray-300">{formattedDate}</span>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <Clock className="h-4 w-4 text-gray-500" />
+            <span className="text-gray-700 dark:text-gray-300">{formattedTime}</span>
+          </div>
+          {event.location && (
+            <div className="flex items-center justify-center gap-2">
+              <MapPin className="h-4 w-4 text-gray-500" />
+              <span className="text-gray-700 dark:text-gray-300">{event.location}</span>
+            </div>
+          )}
+        </div>
+
+        <p className="text-gray-600 dark:text-gray-400 text-sm">{event.description || "No description provided"}</p>
+
+        <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
+          Swipe left to decline, right to "accept", or up for maybe
+        </div>
+      </div>
+    </animated.div>
+  )
+}
