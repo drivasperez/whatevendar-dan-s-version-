@@ -358,20 +358,16 @@ export function LoadingResultCard({
             }}
           >
             <span className="text-7xl mb-4" role="img" aria-label="thinking">
-              🏃‍♂️💨
+              🤔
             </span>
           </animated.div>
 
           <div className="card-divider"></div>
 
-          <p className={cn("text-lg font-medium mb-2", styles.textColor)}>
-            Generating an excuse...
-          </p>
+          <p className={cn("text-lg font-medium mb-2", styles.textColor)}>Thinking of an excuse...</p>
         </div>
 
-        <div className="swipe-instructions">
-          Using Claude to create a custom excuse
-        </div>
+        <div className="swipe-instructions">Please wait while I come up with something creative</div>
       </div>
     </animated.div>
   )
