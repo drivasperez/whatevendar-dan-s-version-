@@ -12,6 +12,7 @@ export interface EventDecision {
   eventId: string
   event: CalendarEvent
   decision: "declined" | "maybe" | "maybe-declined"
-  reason: string
+  comment?: string
+  excuse?: string
   timestamp: string
 }

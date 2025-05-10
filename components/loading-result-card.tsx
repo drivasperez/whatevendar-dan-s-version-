@@ -236,14 +236,14 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
             }}
           >
             <span className="text-7xl mb-4" role="img" aria-label="thinking">
-              🤖
+              🏃‍♂️💨
             </span>
           </animated.div>
 
           <div className="card-divider"></div>
 
           <p className={cn("text-lg font-medium mb-2", styles.textColor)}>
-            Generating AI excuse...
+            Generating an excuse...
           </p>
         </div>
 

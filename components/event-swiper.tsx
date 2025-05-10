@@ -17,7 +17,7 @@ import { RefreshCw } from "lucide-react"
 type CardInDeck =
   | { type: "event"; event: CalendarEvent }
   | { type: "loading"; decision: "declined" | "maybe" | "maybe-declined" }
-  | { type: "result"; decision: "declined" | "maybe" | "maybe-declined"; reason: string }
+  | { type: "result"; decision: "declined" | "maybe" | "maybe-declined"; comment?: string; excuse: string }
 
 export default function EventSwiper() {
   const { events, addDecision, resetEvents } = useEvents()
@@ -118,12 +118,12 @@ export default function EventSwiper() {
           // Generate an AI excuse
           const excuse = await generateAIExcuse(event.title, event.type)
           
-          // Add to decision history
+          // Add to decision history with just the AI excuse
           addDecision({
             eventId: event.id,
             event: event,
             decision: "declined",
-            reason: excuse,
+            excuse,
             timestamp: new Date().toISOString(),
           })
 
@@ -135,7 +135,7 @@ export default function EventSwiper() {
               updatedDeck[loadingCardIndex] = {
                 type: "result",
                 decision,
-                reason: excuse,
+                excuse,
               }
             }
             return updatedDeck
@@ -150,7 +150,7 @@ export default function EventSwiper() {
             eventId: event.id,
             event: event,
             decision: "declined",
-            reason: excuse,
+            excuse,
             timestamp: new Date().toISOString(),
           })
           
@@ -161,7 +161,7 @@ export default function EventSwiper() {
               updatedDeck[loadingCardIndex] = {
                 type: "result",
                 decision,
-                reason: excuse,
+                excuse,
               }
             }
             return updatedDeck
@@ -186,17 +186,16 @@ export default function EventSwiper() {
         try {
           // Generate an AI excuse
           const excuse = await generateAIExcuse(event.title, event.type)
-          const reason = "You selected Maybe, but let's be honest, you probably wanted to decline it anyway. " + excuse
           
-          // Add to decision history
+          // Add to decision history with just the AI excuse
           addDecision({
             eventId: event.id,
             event: event,
             decision: "maybe-declined",
-            reason,
+            excuse, // Store just the AI excuse without the snarky prefix
             timestamp: new Date().toISOString(),
           })
-
+          
           // Replace the loading card with a result card
           setCardsInDeck((prev) => {
             const updatedDeck = [...prev]
@@ -205,7 +204,8 @@ export default function EventSwiper() {
               updatedDeck[loadingCardIndex] = {
                 type: "result",
                 decision,
-                reason,
+                comment: "You selected Maybe, but let's be honest, you probably wanted to decline it anyway.",
+                excuse,
               }
             }
             return updatedDeck
@@ -215,13 +215,12 @@ export default function EventSwiper() {
           
           // Fallback to local excuse generation
           const excuse = generateLocalExcuse()
-          const reason = "You selected Maybe, but let's be honest, you probably wanted to decline it anyway. " + excuse
           
           addDecision({
             eventId: event.id,
             event: event,
             decision: "maybe-declined",
-            reason,
+            excuse, // Store just the excuse without the snarky prefix
             timestamp: new Date().toISOString(),
           })
           
@@ -232,7 +231,8 @@ export default function EventSwiper() {
               updatedDeck[loadingCardIndex] = {
                 type: "result",
                 decision,
-                reason,
+                comment: "You selected Maybe, but let's be honest, you probably wanted to decline it anyway.",
+                excuse,
               }
             }
             return updatedDeck
@@ -298,19 +298,22 @@ export default function EventSwiper() {
             newDeck.splice(eventIndex, 1)
             setCardsInDeck(newDeck)
             
-            const reason = "After much convincing, you tentatively agreed to attend."
+            const comment = "After much convincing, you tentatively agreed to attend."
             
             // Add to decision history
             addDecision({
               eventId: currentEvent.id,
               event: currentEvent,
               decision,
-              reason,
+              comment,
+              excuse: undefined,
               timestamp: new Date().toISOString(),
             })
 
             // After a brief delay, replace the loading card with a result card
-            setTimeout(() => {
+            setTimeout(async () => {
+              const excuse = await generateAIExcuse(currentEvent.title, currentEvent.type)
+              
               setCardsInDeck((prev) => {
                 const updatedDeck = [...prev]
                 const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
@@ -318,7 +321,8 @@ export default function EventSwiper() {
                   updatedDeck[loadingCardIndex] = {
                     type: "result",
                     decision,
-                    reason,
+                    comment: "You made the right choice!",
+                    excuse
                   }
                 }
                 return updatedDeck
@@ -363,14 +367,13 @@ export default function EventSwiper() {
           try {
             // Generate an AI excuse
             const excuse = await generateAIExcuse(currentEvent.title, currentEvent.type)
-            const reason = "You made the right choice! " + excuse
             
-            // Add to decision history
+            // Add to decision history with just the AI excuse
             addDecision({
               eventId: currentEvent.id,
               event: currentEvent,
               decision,
-              reason,
+              excuse,
               timestamp: new Date().toISOString(),
             })
 
@@ -382,7 +385,8 @@ export default function EventSwiper() {
                 updatedDeck[loadingCardIndex] = {
                   type: "result",
                   decision,
-                  reason,
+                  comment: "You made the right choice!",
+                  excuse,
                 }
               }
               return updatedDeck
@@ -392,13 +396,12 @@ export default function EventSwiper() {
             
             // Fallback to local excuse generation
             const excuse = generateLocalExcuse()
-            const reason = "You made the right choice! " + excuse
             
             addDecision({
               eventId: currentEvent.id,
               event: currentEvent,
               decision,
-              reason,
+              excuse,
               timestamp: new Date().toISOString(),
             })
             
@@ -409,7 +412,8 @@ export default function EventSwiper() {
                 updatedDeck[loadingCardIndex] = {
                   type: "result",
                   decision,
-                  reason,
+                  comment: "You made the right choice!",
+                  excuse,
                 }
               }
               return updatedDeck
@@ -518,7 +522,8 @@ export default function EventSwiper() {
               <ResultCard
                 key={`result-${index}`}
                 decision={card.decision}
-                reason={card.reason}
+                comment={card.comment}
+                excuse={card.excuse}
                 onDismiss={handleResultDismiss}
                 active={isActive}
                 index={index}

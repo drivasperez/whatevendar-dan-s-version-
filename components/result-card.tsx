@@ -8,16 +8,28 @@ import { X, HelpCircle, Check, ArrowRight, ArrowLeft } from "lucide-react"
 
 interface ResultCardProps {
   decision: "declined" | "maybe" | "maybe-declined"
-  reason: string
+  comment?: string // New field for the snarky comment
+  excuse?: string // New field for the AI-generated excuse
   onDismiss: () => void
   active: boolean
   index: number
 }
 
-export function ResultCard({ decision, reason, onDismiss, active, index }: ResultCardProps) {
+export function ResultCard({ 
+  decision,  
+  comment, 
+  excuse, 
+  onDismiss, 
+  active, 
+  index 
+}: ResultCardProps) {
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+
+  // Use the legacy 'reason' field if excuse/comment aren't provided
+  const displayExcuse = excuse || ""
+  const displayComment = comment || ""
 
   // Use a ref to track the current position directly
   const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
@@ -256,7 +268,10 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           <div className="card-divider"></div>
 
           <div className="description-box w-full">
-            <p className="text-gray-700 italic">"{reason}"</p>
+            {displayComment && (
+              <p className="text-gray-600 font-medium mb-2">{displayComment}</p>
+            )}
+            <p className="text-gray-700 italic">"{displayExcuse}"</p>
           </div>
         </div>
 
