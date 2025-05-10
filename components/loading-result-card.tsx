@@ -5,7 +5,6 @@ import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import { cn } from "@/lib/utils"
 import { ArrowRight } from "lucide-react"
-import { useTheme } from "next-themes"
 
 interface LoadingResultCardProps {
   decision: "declined" | "maybe" | "maybe-declined"
@@ -15,8 +14,6 @@ interface LoadingResultCardProps {
 }
 
 export function LoadingResultCard({ decision, onDismiss, active, index }: LoadingResultCardProps) {
-  const { theme } = useTheme()
-  const isDark = theme === "dark"
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
 
@@ -44,23 +41,23 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
     switch (decision) {
       case "declined":
         return {
-          bgColor: "bg-red-100 dark:bg-red-900/30",
-          textColor: "text-red-800 dark:text-red-200",
+          bgColor: "bg-red-100",
+          textColor: "text-red-800",
         }
       case "maybe":
         return {
-          bgColor: "bg-blue-100 dark:bg-blue-900/30",
-          textColor: "text-blue-800 dark:text-blue-200",
+          bgColor: "bg-blue-100",
+          textColor: "text-blue-800",
         }
       case "maybe-declined":
         return {
-          bgColor: "bg-purple-100 dark:bg-purple-900/30",
-          textColor: "text-purple-800 dark:text-purple-200",
+          bgColor: "bg-purple-100",
+          textColor: "text-purple-800",
         }
       default:
         return {
-          bgColor: "bg-gray-100 dark:bg-gray-800",
-          textColor: "text-gray-800 dark:text-gray-200",
+          bgColor: "bg-gray-100",
+          textColor: "text-gray-800",
         }
     }
   }
@@ -197,13 +194,7 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
       }}
       {...(active && !swiped ? bind() : {})}
     >
-      <div
-        className={cn(
-          "swipe-card-content",
-          isDark ? "glass-card-dark" : "glass-card",
-          "flex flex-col justify-between shadow-lg",
-        )}
-      >
+      <div className={cn("swipe-card-content", "glass-card", "flex flex-col justify-between shadow-lg")}>
         {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div

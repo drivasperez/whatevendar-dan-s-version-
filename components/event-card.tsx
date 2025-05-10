@@ -6,7 +6,6 @@ import { useDrag } from "@use-gesture/react"
 import type { CalendarEvent } from "@/types/events"
 import { cn } from "@/lib/utils"
 import { Calendar, Clock, MapPin, Check, X, HelpCircle } from "lucide-react"
-import { useTheme } from "next-themes"
 
 interface EventCardProps {
   event: CalendarEvent
@@ -16,8 +15,6 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
-  const { theme } = useTheme()
-  const isDark = theme === "dark"
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | "up" | null>(null)
   const [swiped, setSwiped] = useState(false)
 
@@ -201,13 +198,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
       }}
       {...(active && !swiped ? bind() : {})}
     >
-      <div
-        className={cn(
-          "swipe-card-content",
-          isDark ? "glass-card-dark" : "glass-card",
-          "flex flex-col justify-between shadow-lg",
-        )}
-      >
+      <div className={cn("swipe-card-content", "glass-card", "flex flex-col justify-between shadow-lg")}>
         {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div
@@ -263,27 +254,27 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             <div className="info-item-icon">
               <Calendar className="h-4 w-4" />
             </div>
-            <span className="text-gray-700 dark:text-gray-300">{formattedDate}</span>
+            <span className="text-gray-700">{formattedDate}</span>
           </div>
           <div className="info-item">
             <div className="info-item-icon">
               <Clock className="h-4 w-4" />
             </div>
-            <span className="text-gray-700 dark:text-gray-300">{formattedTime}</span>
+            <span className="text-gray-700">{formattedTime}</span>
           </div>
           {event.location && (
             <div className="info-item">
               <div className="info-item-icon">
                 <MapPin className="h-4 w-4" />
               </div>
-              <span className="text-gray-700 dark:text-gray-300">{event.location}</span>
+              <span className="text-gray-700">{event.location}</span>
             </div>
           )}
         </div>
 
         {event.description && (
           <div className="description-box mb-4">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">{event.description}</p>
+            <p className="text-gray-600 text-sm">{event.description}</p>
           </div>
         )}
 
