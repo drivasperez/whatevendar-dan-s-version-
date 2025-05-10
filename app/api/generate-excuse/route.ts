@@ -32,24 +32,22 @@ export async function POST(req: NextRequest) {
             content: `Generate a deadpan, sarcastic, and hilarious excuse for ${context || 'why I am late'}. 
 
 The excuse should be:
-1. Sarcastic while maintaining a hint of plausibility
+1. Dry, self-deprecating, and quintessentially British in tone
 2. Short and punchy (1-2 sentences maximum)
 3. Tailored specifically to the context (reference the event details like duration and description when available)
-4. Unexpected and original - avoid clichés at all costs
-5. Memorable enough to make people laugh out loud — a crowd of Brits to be specific, so the bar is high
-6. Include a touch of drama or absurdity
+4. Contain tech-related references when appropriate
+5. Subtly clever - avoiding anything too obvious or cheesy
+6. Include references to typical British struggles (weather, public transport, queuing)
 
 If the context mentions specifics about the event (like duration, description, or type), weave those details into your excuse to make it perfectly tailored to that exact situation.
 
+And here are some example excuses to give you a sense of the vibe:
+- "My keyboard achieved sentience and decided to unionize right in the middle of our standups."
+- "My flat's wifi is being throttled by the collective judgment of all my unfinished side projects."
+- "I tried updating my calendar but accidentally deployed it to production and caused a minor incident."
+- "I was busy explaining to my nan that no, turning the router off and on again won't fix her arthritis."
 
-And here are some example silly excuses to give you a sense of the vibe:
-- "my pet goldfish is having an existential crisis"
-- "Mercury is in retrograde and my aura simply can't handle any meetings today"
-- "I've been cast as an extra in a documentary about people who avoid responsibilities"
-- "I've temporarily transcended the mortal plane and can't interact with human affairs"
-- "I've been kidnapped by my own procrastination and the ransom is 'doing absolutely nothing today'"
-
-Just provide the excuse directly without any introductory text or explanation. Make it sarcastic and funny.`
+Just provide the excuse directly without any introductory text or explanation. Make it dry, witty, and very British.`
           }
         ]
       })
