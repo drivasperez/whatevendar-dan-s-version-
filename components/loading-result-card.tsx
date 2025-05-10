@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import { cn } from "@/lib/utils"
@@ -18,6 +18,9 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
   const isDark = theme === "dark"
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartPosRef = useRef({ x: 0, y: 0 })
+  const isSelectingTextRef = useRef(false)
 
   // Get appropriate styling based on decision
   const getDecisionStyles = () => {
@@ -47,13 +50,13 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
 
   const styles = getDecisionStyles()
 
-  // Set up spring for the card with more responsive settings
+  // Set up spring for the card
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
     rotate: 0,
     scale: 1,
-    config: { tension: 500, friction: 25, mass: 0.5 },
+    config: { tension: 300, friction: 30 },
   }))
 
   // Set up spring for the emoji
@@ -70,9 +73,9 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
     config: { duration: 1000 },
   })
 
-  // Set up drag gesture with immediate response
+  // Set up drag gesture
   const bind = useDrag(
-    ({ down, movement: [mx, my], last, velocity }) => {
+    ({ down, movement: [mx, my], last }) => {
       // Don't process if card has already been swiped
       if (swiped) return
 
@@ -86,7 +89,7 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
         // Mark as swiped to prevent further interactions
         setSwiped(true)
 
-        // Animate the card off screen with velocity for natural feel
+        // Animate the card off screen
         const xDest = mx < 0 ? -2000 : 2000
         const rotation = mx < 0 ? -30 : 30
 
@@ -94,11 +97,7 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
           x: xDest,
           y: 0,
           rotate: rotation,
-          config: {
-            friction: 50,
-            tension: 200,
-            velocity: [velocity[0] * 2, velocity[1] * 2], // Use velocity for more natural animation
-          },
+          config: { friction: 50, tension: 200 },
           onRest: () => {
             // Call onDismiss after the animation completes
             onDismiss()
@@ -107,14 +106,14 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
         return
       }
 
-      // Update card position and rotation during drag - use immediate: true for 1:1 movement
+      // Update card position and rotation during drag
       if (down) {
         api.start({
           x: mx,
           y: my,
-          rotate: mx / 15, // Reduced rotation for more natural feel
-          scale: 1.02, // Subtle scale effect
-          immediate: true, // This is key for 1:1 movement with the mouse
+          rotate: mx / 10,
+          scale: 1.05,
+          immediate: true,
         })
       } else {
         // Reset position if not swiped far enough
@@ -123,17 +122,11 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
           y: 0,
           rotate: 0,
           scale: 1,
-          config: { tension: 500, friction: 30 },
         })
         setSwipeDirection(null)
       }
     },
-    {
-      enabled: active && !swiped,
-      filterTaps: true,
-      rubberband: true,
-      initial: [0, 0],
-    },
+    { enabled: active && !swiped },
   )
 
   return (
@@ -154,7 +147,6 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
         left: 0,
         right: 0,
         bottom: 0,
-        touchAction: "none", // Prevent browser handling of touch gestures
       }}
       {...(active && !swiped ? bind() : {})}
     >

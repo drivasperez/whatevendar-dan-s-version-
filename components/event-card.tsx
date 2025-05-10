@@ -21,19 +21,18 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | "up" | null>(null)
   const [swiped, setSwiped] = useState(false)
 
-  // Set up spring for the card with more responsive settings
+  // Set up spring for the card
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
     rotate: 0,
     scale: active ? 1 : 0.9,
-    // Use a more responsive config for immediate feedback
-    config: { tension: 500, friction: 25, mass: 0.5 },
+    config: { tension: 300, friction: 30 },
   }))
 
-  // Set up drag gesture with immediate response
+  // Set up drag gesture
   const bind = useDrag(
-    ({ down, movement: [mx, my], last, velocity }) => {
+    ({ down, movement: [mx, my], last }) => {
       // Don't process if card has already been swiped
       if (swiped) return
 
@@ -68,7 +67,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             finalDirection = isSwipingLeft ? "left" : "right"
           }
 
-          // Animate the card off screen with velocity for natural feel
+          // Animate the card off screen
           const xDest = finalDirection === "left" ? -2000 : finalDirection === "right" ? 2000 : 0
           const yDest = finalDirection === "up" ? -2000 : 0
           const rotation = finalDirection === "left" ? -30 : finalDirection === "right" ? 30 : 0
@@ -77,11 +76,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             x: xDest,
             y: yDest,
             rotate: rotation,
-            config: {
-              friction: 50,
-              tension: 200,
-              velocity: [velocity[0] * 2, velocity[1] * 2], // Use velocity for more natural animation
-            },
+            config: { friction: 50, tension: 200 },
             onRest: () => {
               // Call onSwipe after the animation completes
               onSwipe(finalDirection, event)
@@ -95,30 +90,23 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             y: 0,
             rotate: 0,
             scale: active ? 1 : 0.9,
-            config: { tension: 500, friction: 30 },
           })
           setSwipeDirection(null)
         }
       }
 
-      // Update card position and rotation during drag - use immediate: true for 1:1 movement
+      // Update card position and rotation during drag
       if (down) {
         api.start({
           x: mx,
           y: my,
-          rotate: mx / 15, // Reduced rotation for more natural feel
-          scale: 1.02, // Subtle scale effect
-          immediate: true, // This is key for 1:1 movement with the mouse
+          rotate: mx / 10,
+          scale: 1.05,
+          immediate: true,
         })
       }
     },
-    {
-      enabled: active && !swiped,
-      // Add these options for more responsive dragging
-      filterTaps: true,
-      rubberband: true,
-      initial: [0, 0],
-    },
+    { enabled: active && !swiped },
   )
 
   // Format date for display
@@ -153,7 +141,6 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
         left: 0,
         right: 0,
         bottom: 0,
-        touchAction: "none", // Prevent browser handling of touch gestures
       }}
       {...(active && !swiped ? bind() : {})}
     >
