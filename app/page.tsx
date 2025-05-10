@@ -5,7 +5,7 @@ import { TestControls } from "@/components/test-controls"
 
 export default function Home() {
   return (
-    <main className="flex h-screen items-center justify-center animated-gradient-bg overflow-hidden">
+    <main className="flex h-screen items-center justify-center overflow-hidden">
       <div className="w-full max-w-md flex items-center justify-center">
         <Suspense fallback={<LoadingEvents />}>
           <EventSwiper />

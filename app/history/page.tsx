@@ -4,7 +4,7 @@ import { LoadingHistory } from "@/components/loading"
 
 export default function HistoryPage() {
   return (
-    <main className="flex h-screen items-center justify-center animated-gradient-bg overflow-hidden">
+    <main className="flex h-screen items-center justify-center overflow-hidden">
       <div className="w-full max-w-3xl mx-auto flex flex-col items-center">
         <h1 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500 mb-6 font-old-standard">
           Your Decision History

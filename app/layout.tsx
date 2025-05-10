@@ -5,6 +5,8 @@ import "./globals.css"
 import Navbar from "@/components/navbar"
 import { Toaster } from "@/components/ui/toaster"
 import { EventsProvider } from "@/context/events-context"
+import { LavaLampBackground } from "@/components/lava-lamp-background"
+import { ThemeProvider } from "@/components/theme-provider"
 
 // Load Old Standard TT font
 const oldStandard = Old_Standard_TT({
@@ -35,13 +37,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${oldStandard.variable} ${inter.variable}`}>
       <body className={inter.className}>
-        <EventsProvider>
-          <div className="relative h-screen overflow-hidden">
-            <Navbar />
-            <div className="pt-16 h-full">{children}</div>
-            <Toaster />
-          </div>
-        </EventsProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <EventsProvider>
+            <div className="relative h-screen overflow-hidden">
+              <LavaLampBackground />
+              <Navbar />
+              <div className="pt-16 h-full">{children}</div>
+              <Toaster />
+            </div>
+          </EventsProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
