@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
 The excuse should be:
 1. Sarcastic while maintaining a hint of plausibility
-2. Short and punchy (1-3 sentences maximum)
+2. Short and punchy (1-2 sentences maximum)
 3. Tailored specifically to the context (reference the event details like duration and description when available)
 4. Unexpected and original - avoid clichés at all costs
 5. Memorable enough to make people laugh out loud — a crowd of Brits to be specific, so the bar is high
@@ -41,15 +41,6 @@ The excuse should be:
 
 If the context mentions specifics about the event (like duration, description, or type), weave those details into your excuse to make it perfectly tailored to that exact situation.
 
-Here are some example excuse starters to inspire your tone:
-- "Sorry, I can't make it because"
-- "Unfortunately, I won't be able to attend as"
-- "This is totally legitimate and not made up, but"
-- "Hold onto your hat, because"
-- "In a plot twist nobody saw coming,"
-- "The universe is conspiring against me because"
-- "Brace yourself for this excuse, but"
-- "Let me paint you a picture of my current situation:"
 
 And here are some example silly excuses to give you a sense of the vibe:
 - "my pet goldfish is having an existential crisis"
