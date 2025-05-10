@@ -5,6 +5,7 @@ import { EventCard } from "./event-card"
 import { ResultCard } from "./result-card"
 import { LoadingResultCard } from "./loading-result-card"
 import { ConfettiEffect } from "./confetti-effect"
+import { ExcuseBubbles } from "./excuse-bubbles"
 import { useEvents } from "@/context/events-context"
 import type { CalendarEvent } from "@/types/events"
 import { generateExcuse } from "@/lib/excuse-generator"
@@ -25,6 +26,7 @@ export default function EventSwiper() {
   const [currentEvent, setCurrentEvent] = useState<CalendarEvent | null>(null)
   const [noMoreEvents, setNoMoreEvents] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [showBubbles, setShowBubbles] = useState(false)
 
   // Track all cards in the deck (events, loading, and results)
   const [cardsInDeck, setCardsInDeck] = useState<CardInDeck[]>([])
@@ -66,6 +68,13 @@ export default function EventSwiper() {
 
       return () => clearTimeout(timer)
     }
+  }, [cardsInDeck])
+
+  // Show bubbles when there's an active event card
+  useEffect(() => {
+    // Check if the top card is an event card
+    const hasActiveEventCard = cardsInDeck.length > 0 && cardsInDeck[0].type === "event"
+    setShowBubbles(hasActiveEventCard)
   }, [cardsInDeck])
 
   // Handle event card swipe
@@ -372,6 +381,9 @@ export default function EventSwiper() {
 
   return (
     <>
+      {/* Bubbles are now rendered at the root level, outside any card transforms */}
+      <ExcuseBubbles active={showBubbles} />
+
       <div className="relative w-full h-[500px] flex items-center justify-center">
         {cardsInDeck.slice(0, 3).map((card, index) => {
           // Apply consistent card styling and positioning

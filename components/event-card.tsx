@@ -6,7 +6,6 @@ import { useDrag } from "@use-gesture/react"
 import type { CalendarEvent } from "@/types/events"
 import { cn } from "@/lib/utils"
 import { Calendar, Clock, MapPin, Check, X, HelpCircle } from "lucide-react"
-import { ExcuseBubbles } from "./excuse-bubbles"
 
 interface EventCardProps {
   event: CalendarEvent
@@ -199,9 +198,6 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
       }}
       {...(active && !swiped ? bind() : {})}
     >
-      {/* Add the ExcuseBubbles component */}
-      <ExcuseBubbles active={active && !swiped} />
-
       <div
         className={cn("swipe-card-content", "glass-card", "flex flex-col justify-between shadow-lg")}
         style={{ position: "relative", zIndex: 1 }} // Ensure card content is above bubbles
