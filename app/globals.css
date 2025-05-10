@@ -58,17 +58,21 @@
   }
 }
 
-/* Updated card styles with fully opaque backgrounds */
+/* Updated card styles with fully opaque backgrounds and consistent border radius */
 .glass-card {
   background: #ffffff; /* Solid white background */
   border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  overflow: hidden; /* Ensure content doesn't overflow rounded corners */
 }
 
 .glass-card-dark {
   background: #1a1d2d; /* Solid dark background */
   border: 1px solid rgba(255, 255, 255, 0.125);
+  border-radius: var(--radius);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  overflow: hidden; /* Ensure content doesn't overflow rounded corners */
 }
 
 .swipe-card {
@@ -81,6 +85,8 @@
   justify-content: center;
   touch-action: none;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
+  border-radius: var(--radius); /* Add border radius to the outer container */
+  overflow: hidden; /* Ensure content doesn't overflow rounded corners */
 }
 
 /* Ensure all cards have the same dimensions */
@@ -88,7 +94,6 @@
   width: 100%;
   height: 100%;
   padding: 1.5rem;
-  border-radius: var(--radius);
   will-change: transform;
   display: flex;
   flex-direction: column;
@@ -97,11 +102,12 @@
   text-align: center;
   transition: all 0.3s ease;
   user-select: none; /* Prevent text selection */
+  border-radius: var(--radius); /* Ensure consistent border radius */
 }
 
-/* Add this class for when dragging is active */
-.dragging-active {
-  user-select: none;
+.swipe-card-content h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* Refined card stacking effect to make cards appear pre-stacked */
@@ -140,29 +146,77 @@
 }
 
 .swipe-indicator-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
-  font-weight: bold;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
+  transform: scale(0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .swipe-left .swipe-indicator-left {
   opacity: 1;
-  background-color: rgba(239, 68, 68, 0.9);
+  transform: scale(1);
+  background: linear-gradient(135deg, #ff4b4b, #ff7676);
   color: white;
+  animation: pulse-decline 1.5s infinite;
 }
 
 .swipe-right .swipe-indicator-right {
   opacity: 1;
-  background-color: rgba(34, 197, 94, 0.9);
+  transform: scale(1);
+  background: linear-gradient(135deg, #4caf50, #8bc34a);
   color: white;
+  animation: pulse-accept 1.5s infinite;
 }
 
 .swipe-up .swipe-indicator-up {
   opacity: 1;
-  background-color: rgba(59, 130, 246, 0.9);
+  transform: scale(1);
+  background: linear-gradient(135deg, #2196f3, #03a9f4);
   color: white;
+  animation: pulse-maybe 1.5s infinite;
+}
+
+@keyframes pulse-decline {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 75, 75, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 75, 75, 0);
+  }
+}
+
+@keyframes pulse-accept {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+@keyframes pulse-maybe {
+  0% {
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+  }
 }
 
 .history-item {
@@ -212,4 +266,21 @@
 .thinking-emoji {
   animation: thinking 2s ease-in-out infinite;
   display: inline-block;
+}
+
+/* Improve text readability */
+p,
+span,
+div {
+  letter-spacing: -0.01em;
+}
+
+/* Make headings more stylish */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.03em;
 }

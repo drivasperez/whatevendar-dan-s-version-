@@ -5,7 +5,7 @@ import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import type { CalendarEvent } from "@/types/events"
 import { cn } from "@/lib/utils"
-import { Calendar, Clock, MapPin } from "lucide-react"
+import { Calendar, Clock, MapPin, Check, X, HelpCircle } from "lucide-react"
 import { useTheme } from "next-themes"
 
 interface EventCardProps {
@@ -23,6 +23,29 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
 
   // Use a ref to track the current position directly
   const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
+
+  const getIndicatorScale = (direction: "left" | "right" | "up" | null, x: number) => {
+    if (!direction) return 1
+
+    // Base scale when not moving
+    const baseScale = 1
+
+    // Calculate scale based on x position
+    // For left swipe, scale up the left indicator as x becomes more negative
+    if (direction === "left") {
+      return baseScale + Math.min(Math.abs(x) / 200, 0.5)
+    }
+    // For right swipe, scale up the right indicator as x becomes more positive
+    else if (direction === "right") {
+      return baseScale + Math.min(Math.abs(x) / 200, 0.5)
+    }
+    // For up swipe, scale up the up indicator as y becomes more negative
+    else if (direction === "up") {
+      return baseScale + Math.min(Math.abs(x) / 200, 0.3)
+    }
+
+    return baseScale
+  }
 
   // Set up spring for the card with more responsive settings
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
@@ -186,9 +209,36 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
         )}
       >
         <div className="swipe-indicator">
-          <div className="swipe-indicator-item swipe-indicator-left">Decline</div>
-          <div className="swipe-indicator-item swipe-indicator-up">Maybe</div>
-          <div className="swipe-indicator-item swipe-indicator-right">"Accept"</div>
+          <div
+            className="swipe-indicator-item swipe-indicator-left"
+            style={{
+              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
+              opacity: swipeDirection === "left" ? 1 : 0,
+            }}
+          >
+            <X className="h-4 w-4 mr-1" />
+            <span>Decline</span>
+          </div>
+          <div
+            className="swipe-indicator-item swipe-indicator-up"
+            style={{
+              transform: `scale(${getIndicatorScale("up", swipeDirection === "up" ? positionRef.current.y : 0)})`,
+              opacity: swipeDirection === "up" ? 1 : 0,
+            }}
+          >
+            <HelpCircle className="h-4 w-4 mr-1" />
+            <span>Maybe</span>
+          </div>
+          <div
+            className="swipe-indicator-item swipe-indicator-right"
+            style={{
+              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
+              opacity: swipeDirection === "right" ? 1 : 0,
+            }}
+          >
+            <Check className="h-4 w-4 mr-1" />
+            <span>Accept</span>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -219,7 +269,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
         <p className="text-gray-600 dark:text-gray-400 text-sm">{event.description || "No description provided"}</p>
 
         <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-          Swipe left to decline, right to "accept", or up for maybe
+          Swipe left to decline, right to accept, or up for maybe
         </div>
       </div>
     </animated.div>

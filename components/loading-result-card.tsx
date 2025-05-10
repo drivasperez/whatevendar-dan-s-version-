@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import { cn } from "@/lib/utils"
+import { ArrowRight } from "lucide-react"
 import { useTheme } from "next-themes"
 
 interface LoadingResultCardProps {
@@ -21,6 +22,22 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
 
   // Use a ref to track the current position directly
   const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
+
+  const getIndicatorScale = (direction: "left" | "right" | null, x: number) => {
+    if (!direction) return 1
+
+    // Base scale when not moving
+    const baseScale = 1
+
+    // Calculate scale based on x position
+    if (direction === "left") {
+      return baseScale + Math.min(Math.abs(x) / 200, 0.5)
+    } else if (direction === "right") {
+      return baseScale + Math.min(Math.abs(x) / 200, 0.5)
+    }
+
+    return baseScale
+  }
 
   // Get appropriate styling based on decision
   const getDecisionStyles = () => {
@@ -188,8 +205,26 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
         )}
       >
         <div className="swipe-indicator">
-          <div className="swipe-indicator-item swipe-indicator-left">Dismiss</div>
-          <div className="swipe-indicator-item swipe-indicator-right">Dismiss</div>
+          <div
+            className="swipe-indicator-item swipe-indicator-left"
+            style={{
+              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
+              opacity: swipeDirection === "left" ? 1 : 0,
+            }}
+          >
+            <ArrowRight className="h-4 w-4 mr-1" />
+            <span>Skip</span>
+          </div>
+          <div
+            className="swipe-indicator-item swipe-indicator-right"
+            style={{
+              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
+              opacity: swipeDirection === "right" ? 1 : 0,
+            }}
+          >
+            <ArrowRight className="h-4 w-4 mr-1" />
+            <span>Skip</span>
+          </div>
         </div>
 
         <div className="mb-4">
