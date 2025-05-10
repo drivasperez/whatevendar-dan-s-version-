@@ -11,10 +11,9 @@ interface LoadingResultCardProps {
   onDismiss: () => void
   active: boolean
   index: number
-  isGeneratingExcuse?: boolean
 }
 
-export function LoadingResultCard({ decision, onDismiss, active, index, isGeneratingExcuse = false }: LoadingResultCardProps) {
+export function LoadingResultCard({ decision, onDismiss, active, index }: LoadingResultCardProps) {
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
 
@@ -237,19 +236,19 @@ export function LoadingResultCard({ decision, onDismiss, active, index, isGenera
             }}
           >
             <span className="text-7xl mb-4" role="img" aria-label="thinking">
-              {isGeneratingExcuse ? "🤖" : "🤔"}
+              🤖
             </span>
           </animated.div>
 
           <div className="card-divider"></div>
 
           <p className={cn("text-lg font-medium mb-2", styles.textColor)}>
-            {isGeneratingExcuse ? "Generating AI excuse..." : "Thinking of an excuse..."}
+            Generating AI excuse...
           </p>
         </div>
 
         <div className="swipe-instructions">
-          {isGeneratingExcuse ? "Using Claude AI to create a custom excuse" : "Please wait while I come up with something creative"}
+          Using Claude to create a custom excuse
         </div>
       </div>
     </animated.div>

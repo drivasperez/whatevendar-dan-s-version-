@@ -16,7 +16,7 @@ import { RefreshCw } from "lucide-react"
 // Define a type for the cards in the deck
 type CardInDeck =
   | { type: "event"; event: CalendarEvent }
-  | { type: "loading"; decision: "declined" | "maybe" | "maybe-declined"; isGeneratingExcuse?: boolean }
+  | { type: "loading"; decision: "declined" | "maybe" | "maybe-declined" }
   | { type: "result"; decision: "declined" | "maybe" | "maybe-declined"; reason: string }
 
 export default function EventSwiper() {
@@ -45,7 +45,7 @@ export default function EventSwiper() {
         events.forEach((event) => {
           newDeck.push({ type: "event", event })
           // Add a loading card after each event card
-          newDeck.push({ type: "loading", decision: "declined", isGeneratingExcuse: false })
+          newDeck.push({ type: "loading", decision: "declined" })
         })
         setCardsInDeck(newDeck)
       }
@@ -101,13 +101,12 @@ export default function EventSwiper() {
       if (direction === "left") {
         decision = "declined"
 
-        // Update the loading card to show it's generating an excuse
+        // Update the loading card
         const newDeck = [...cardsInDeck]
         if (newDeck[loadingIndex].type === "loading") {
           newDeck[loadingIndex] = { 
             type: "loading",
-            decision, 
-            isGeneratingExcuse: true 
+            decision
           }
         }
         
@@ -171,13 +170,12 @@ export default function EventSwiper() {
       } else if (direction === "up") {
         decision = "maybe-declined"
 
-        // Update the loading card to show it's generating an excuse
+        // Update the loading card
         const newDeck = [...cardsInDeck]
         if (newDeck[loadingIndex].type === "loading") {
           newDeck[loadingIndex] = { 
             type: "loading",
-            decision, 
-            isGeneratingExcuse: true 
+            decision
           }
         }
         
@@ -287,13 +285,12 @@ export default function EventSwiper() {
 
           // Make sure the loading card exists
           if (loadingIndex < cardsInDeck.length && cardsInDeck[loadingIndex].type === "loading") {
-            // Update the loading card to show it's generating an excuse
+            // Update the loading card
             const newDeck = [...cardsInDeck]
             if (newDeck[loadingIndex].type === "loading") {
               newDeck[loadingIndex] = { 
                 type: "loading",
-                decision, 
-                isGeneratingExcuse: true 
+                decision
               }
             }
 
@@ -350,13 +347,12 @@ export default function EventSwiper() {
 
         // Make sure the loading card exists
         if (loadingIndex < cardsInDeck.length && cardsInDeck[loadingIndex].type === "loading") {
-          // Update the loading card to show it's generating an excuse
+          // Update the loading card
           const newDeck = [...cardsInDeck]
           if (newDeck[loadingIndex].type === "loading") {
             newDeck[loadingIndex] = { 
               type: "loading",
-              decision, 
-              isGeneratingExcuse: true 
+              decision
             }
           }
 
@@ -515,7 +511,6 @@ export default function EventSwiper() {
                 onDismiss={handleLoadingDismiss}
                 active={isActive}
                 index={index}
-                isGeneratingExcuse={card.isGeneratingExcuse}
               />
             )
           } else {
