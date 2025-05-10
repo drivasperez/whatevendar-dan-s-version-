@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Outfit } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/navbar"
 import { Toaster } from "@/components/ui/toaster"
 import { EventsProvider } from "@/context/events-context"
@@ -23,15 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={outfit.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          <EventsProvider>
-            <div className="relative h-screen overflow-hidden">
-              <Navbar />
-              <div className="pt-16 h-full">{children}</div>
-              <Toaster />
-            </div>
-          </EventsProvider>
-        </ThemeProvider>
+        <EventsProvider>
+          <div className="relative h-screen overflow-hidden">
+            <Navbar />
+            <div className="pt-16 h-full">{children}</div>
+            <Toaster />
+          </div>
+        </EventsProvider>
       </body>
     </html>
   )

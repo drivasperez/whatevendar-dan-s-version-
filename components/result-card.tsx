@@ -5,7 +5,6 @@ import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import { cn } from "@/lib/utils"
 import { X, HelpCircle, Check, ArrowRight, ArrowLeft } from "lucide-react"
-import { useTheme } from "next-themes"
 
 interface ResultCardProps {
   decision: "declined" | "maybe" | "maybe-declined"
@@ -16,8 +15,6 @@ interface ResultCardProps {
 }
 
 export function ResultCard({ decision, reason, onDismiss, active, index }: ResultCardProps) {
-  const { theme } = useTheme()
-  const isDark = theme === "dark"
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -153,8 +150,8 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           bgColor: "bg-red-500",
           title: "Event Declined",
           badge: {
-            bg: "bg-red-100 dark:bg-red-900/30",
-            text: "text-red-800 dark:text-red-200",
+            bg: "bg-red-100",
+            text: "text-red-800",
             label: "Declined",
           },
         }
@@ -164,8 +161,8 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           bgColor: "bg-blue-500",
           title: "Event Marked as Maybe",
           badge: {
-            bg: "bg-blue-100 dark:bg-blue-900/30",
-            text: "text-blue-800 dark:text-blue-200",
+            bg: "bg-blue-100",
+            text: "text-blue-800",
             label: "Maybe",
           },
         }
@@ -175,8 +172,8 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           bgColor: "bg-purple-500",
           title: "Maybe → Declined",
           badge: {
-            bg: "bg-purple-100 dark:bg-purple-900/30",
-            text: "text-purple-800 dark:text-purple-200",
+            bg: "bg-purple-100",
+            text: "text-purple-800",
             label: "Maybe → Declined",
           },
         }
@@ -186,8 +183,8 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           bgColor: "bg-gray-500",
           title: "Decision Made",
           badge: {
-            bg: "bg-gray-100 dark:bg-gray-800",
-            text: "text-gray-800 dark:text-gray-200",
+            bg: "bg-gray-100",
+            text: "text-gray-800",
             label: "Processed",
           },
         }
@@ -220,13 +217,7 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
       }}
       {...(active && !swiped ? bind() : {})}
     >
-      <div
-        className={cn(
-          "swipe-card-content",
-          isDark ? "glass-card-dark" : "glass-card",
-          "flex flex-col justify-between shadow-lg",
-        )}
-      >
+      <div className={cn("swipe-card-content", "glass-card", "flex flex-col justify-between shadow-lg")}>
         {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div
@@ -265,7 +256,7 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           <div className="card-divider"></div>
 
           <div className="description-box w-full">
-            <p className="text-gray-700 dark:text-gray-300 italic">"{reason}"</p>
+            <p className="text-gray-700 italic">"{reason}"</p>
           </div>
         </div>
 
