@@ -8,7 +8,7 @@ import { ConfettiEffect } from "./confetti-effect"
 import { ExcuseBubbles } from "./excuse-bubbles"
 import { useEvents } from "@/context/events-context"
 import type { CalendarEvent } from "@/types/events"
-import { generateExcuse } from "@/lib/excuse-generator"
+import { generateLocalExcuse } from "@/lib/excuse-generator"
 import { Button } from "./ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { RefreshCw } from "lucide-react"
@@ -102,7 +102,7 @@ export default function EventSwiper() {
         decision = "declined"
 
         // Add to decision history
-        const excuse = generateExcuse()
+        const excuse = generateLocalExcuse()
         addDecision({
           eventId: event.id,
           event: event,
@@ -139,7 +139,7 @@ export default function EventSwiper() {
         decision = "maybe-declined"
 
         // Add to decision history
-        const excuse = generateExcuse()
+        const excuse = generateLocalExcuse()
         const reason = "You selected Maybe, but let's be honest, you probably wanted to decline it anyway. " + excuse
 
         addDecision({
@@ -267,7 +267,7 @@ export default function EventSwiper() {
   const handleDialogCancel = () => {
     // User gives up trying to accept
     if (currentEvent) {
-      const excuse = generateExcuse()
+      const excuse = generateLocalExcuse()
       const reason = "You made the right choice! " + excuse
       const decision = "declined"
 
