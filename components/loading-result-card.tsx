@@ -18,9 +18,9 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
   const isDark = theme === "dark"
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const dragStartPosRef = useRef({ x: 0, y: 0 })
-  const isSelectingTextRef = useRef(false)
+
+  // Use a ref to track the current position directly
+  const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
 
   // Get appropriate styling based on decision
   const getDecisionStyles = () => {
@@ -50,13 +50,13 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
 
   const styles = getDecisionStyles()
 
-  // Set up spring for the card
+  // Set up spring for the card with more responsive settings
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
     rotate: 0,
     scale: 1,
-    config: { tension: 300, friction: 30 },
+    config: { tension: 800, friction: 15, mass: 0.1 },
   }))
 
   // Set up spring for the emoji
@@ -73,11 +73,16 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
     config: { duration: 1000 },
   })
 
-  // Set up drag gesture
+  // Set up drag gesture with direct position updates
   const bind = useDrag(
-    ({ down, movement: [mx, my], last }) => {
+    ({ down, movement: [mx, my], last, velocity, first }) => {
       // Don't process if card has already been swiped
       if (swiped) return
+
+      // On first touch, reset any existing movement
+      if (first) {
+        positionRef.current = { x: 0, y: 0, rotation: 0 }
+      }
 
       // Determine swipe direction for visual indicator
       const dir = mx < 0 ? "left" : "right"
@@ -89,7 +94,7 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
         // Mark as swiped to prevent further interactions
         setSwiped(true)
 
-        // Animate the card off screen
+        // Animate the card off screen with velocity for natural feel
         const xDest = mx < 0 ? -2000 : 2000
         const rotation = mx < 0 ? -30 : 30
 
@@ -97,7 +102,11 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
           x: xDest,
           y: 0,
           rotate: rotation,
-          config: { friction: 50, tension: 200 },
+          config: {
+            friction: 20,
+            tension: 2000,
+            velocity: [velocity[0] * 20, velocity[1] * 20], // Use velocity for more natural animation
+          },
           onRest: () => {
             // Call onDismiss after the animation completes
             onDismiss()
@@ -108,12 +117,24 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
 
       // Update card position and rotation during drag
       if (down) {
+        // Apply a multiplier to make the card move faster than the mouse if needed
+        // Using 1.0 for exact 1:1 movement, can increase to make it move faster
+        const movementMultiplier = 1.0
+
+        // Update position directly without any smoothing or delay
+        positionRef.current = {
+          x: mx * movementMultiplier,
+          y: my * movementMultiplier,
+          rotation: mx / 20,
+        }
+
+        // Apply the position directly to the spring
         api.start({
-          x: mx,
-          y: my,
-          rotate: mx / 10,
-          scale: 1.05,
-          immediate: true,
+          x: positionRef.current.x,
+          y: positionRef.current.y,
+          rotate: positionRef.current.rotation,
+          scale: 1.02,
+          immediate: true, // This is critical for direct movement
         })
       } else {
         // Reset position if not swiped far enough
@@ -122,11 +143,18 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
           y: 0,
           rotate: 0,
           scale: 1,
+          config: { tension: 500, friction: 30 },
         })
         setSwipeDirection(null)
       }
     },
-    { enabled: active && !swiped },
+    {
+      enabled: active && !swiped,
+      filterTaps: false, // Disable tap filtering for more immediate response
+      rubberband: false, // Disable rubberband effect for direct control
+      initial: [0, 0],
+      bounds: { left: -1000, right: 1000, top: -1000, bottom: 1000 }, // Set large bounds
+    },
   )
 
   return (
@@ -147,6 +175,8 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
         left: 0,
         right: 0,
         bottom: 0,
+        touchAction: "none", // Prevent browser handling of touch gestures
+        willChange: "transform", // Hint to browser to optimize transforms
       }}
       {...(active && !swiped ? bind() : {})}
     >

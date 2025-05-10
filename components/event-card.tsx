@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import type { CalendarEvent } from "@/types/events"
@@ -21,20 +21,29 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | "up" | null>(null)
   const [swiped, setSwiped] = useState(false)
 
-  // Set up spring for the card
+  // Use a ref to track the current position directly
+  const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
+
+  // Set up spring for the card with more responsive settings
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
     rotate: 0,
     scale: active ? 1 : 0.9,
-    config: { tension: 300, friction: 30 },
+    // Use a more responsive config for immediate feedback
+    config: { tension: 800, friction: 15, mass: 0.1 },
   }))
 
-  // Set up drag gesture
+  // Set up drag gesture with direct position updates
   const bind = useDrag(
-    ({ down, movement: [mx, my], last }) => {
+    ({ down, movement: [mx, my], last, velocity, first }) => {
       // Don't process if card has already been swiped
       if (swiped) return
+
+      // On first touch, reset any existing movement
+      if (first) {
+        positionRef.current = { x: 0, y: 0, rotation: 0 }
+      }
 
       // Determine swipe direction based on movement
       const swipeThreshold = 80 // Lower threshold to make swiping easier
@@ -67,7 +76,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             finalDirection = isSwipingLeft ? "left" : "right"
           }
 
-          // Animate the card off screen
+          // Animate the card off screen with velocity for natural feel
           const xDest = finalDirection === "left" ? -2000 : finalDirection === "right" ? 2000 : 0
           const yDest = finalDirection === "up" ? -2000 : 0
           const rotation = finalDirection === "left" ? -30 : finalDirection === "right" ? 30 : 0
@@ -76,7 +85,11 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             x: xDest,
             y: yDest,
             rotate: rotation,
-            config: { friction: 50, tension: 200 },
+            config: {
+              friction: 50,
+              tension: 200,
+              velocity: [velocity[0] * 2, velocity[1] * 2], // Use velocity for more natural animation
+            },
             onRest: () => {
               // Call onSwipe after the animation completes
               onSwipe(finalDirection, event)
@@ -90,6 +103,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
             y: 0,
             rotate: 0,
             scale: active ? 1 : 0.9,
+            config: { tension: 500, friction: 30 },
           })
           setSwipeDirection(null)
         }
@@ -97,16 +111,34 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
 
       // Update card position and rotation during drag
       if (down) {
+        // Apply a multiplier to make the card move faster than the mouse if needed
+        // Using 1.0 for exact 1:1 movement, can increase to make it move faster
+        const movementMultiplier = 1.0
+
+        // Update position directly without any smoothing or delay
+        positionRef.current = {
+          x: mx * movementMultiplier,
+          y: my * movementMultiplier,
+          rotation: mx / 20,
+        }
+
+        // Apply the position directly to the spring
         api.start({
-          x: mx,
-          y: my,
-          rotate: mx / 10,
-          scale: 1.05,
-          immediate: true,
+          x: positionRef.current.x,
+          y: positionRef.current.y,
+          rotate: positionRef.current.rotation,
+          scale: 1.02,
+          immediate: true, // This is critical for direct movement
         })
       }
     },
-    { enabled: active && !swiped },
+    {
+      enabled: active && !swiped,
+      filterTaps: false, // Disable tap filtering for more immediate response
+      rubberband: false, // Disable rubberband effect for direct control
+      initial: [0, 0],
+      bounds: { left: -1000, right: 1000, top: -1000, bottom: 1000 }, // Set large bounds
+    },
   )
 
   // Format date for display
@@ -141,6 +173,8 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
         left: 0,
         right: 0,
         bottom: 0,
+        touchAction: "none", // Prevent browser handling of touch gestures
+        willChange: "transform", // Hint to browser to optimize transforms
       }}
       {...(active && !swiped ? bind() : {})}
     >

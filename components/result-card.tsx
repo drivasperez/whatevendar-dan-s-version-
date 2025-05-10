@@ -21,17 +21,17 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
   const [swiped, setSwiped] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const dragStartPosRef = useRef({ x: 0, y: 0 })
-  const isSelectingTextRef = useRef(false)
 
-  // Set up spring for the card
+  // Use a ref to track the current position directly
+  const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
+
+  // Set up spring for the card with more responsive settings
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
     rotate: 0,
     scale: 1,
-    config: { tension: 300, friction: 30 },
+    config: { tension: 800, friction: 15, mass: 0.1 },
   }))
 
   // Animate in when component mounts
@@ -44,11 +44,16 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
     setIsVisible(true)
   }, [api])
 
-  // Set up drag gesture - simpler than event card since any direction dismisses
+  // Set up drag gesture with direct position updates
   const bind = useDrag(
-    ({ down, movement: [mx, my], last }) => {
+    ({ down, movement: [mx, my], last, velocity, first }) => {
       // Don't process if card has already been swiped
       if (swiped) return
+
+      // On first touch, reset any existing movement
+      if (first) {
+        positionRef.current = { x: 0, y: 0, rotation: 0 }
+      }
 
       // Determine swipe direction for visual indicator
       const dir = mx < 0 ? "left" : "right"
@@ -60,7 +65,7 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
         // Mark as swiped to prevent further interactions
         setSwiped(true)
 
-        // Animate the card off screen
+        // Animate the card off screen with velocity for natural feel
         const xDest = mx < 0 ? -2000 : 2000
         const rotation = mx < 0 ? -30 : 30
 
@@ -68,7 +73,11 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           x: xDest,
           y: 0,
           rotate: rotation,
-          config: { friction: 50, tension: 200 },
+          config: {
+            friction: 50,
+            tension: 200,
+            velocity: [velocity[0] * 2, velocity[1] * 2], // Use velocity for more natural animation
+          },
           onRest: () => {
             // Call onDismiss after the animation completes
             onDismiss()
@@ -79,12 +88,24 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
 
       // Update card position and rotation during drag
       if (down) {
+        // Apply a multiplier to make the card move faster than the mouse if needed
+        // Using 1.0 for exact 1:1 movement, can increase to make it move faster
+        const movementMultiplier = 1.0
+
+        // Update position directly without any smoothing or delay
+        positionRef.current = {
+          x: mx * movementMultiplier,
+          y: my * movementMultiplier,
+          rotation: mx / 20,
+        }
+
+        // Apply the position directly to the spring
         api.start({
-          x: mx,
-          y: my,
-          rotate: mx / 10,
-          scale: 1.05,
-          immediate: true,
+          x: positionRef.current.x,
+          y: positionRef.current.y,
+          rotate: positionRef.current.rotation,
+          scale: 1.02,
+          immediate: true, // This is critical for direct movement
         })
       } else {
         // Reset position if not swiped far enough
@@ -93,11 +114,18 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           y: 0,
           rotate: 0,
           scale: active ? 1 : 0.9,
+          config: { tension: 500, friction: 30 },
         })
         setSwipeDirection(null)
       }
     },
-    { enabled: active && !swiped },
+    {
+      enabled: active && !swiped,
+      filterTaps: false, // Disable tap filtering for more immediate response
+      rubberband: false, // Disable rubberband effect for direct control
+      initial: [0, 0],
+      bounds: { left: -1000, right: 1000, top: -1000, bottom: 1000 }, // Set large bounds
+    },
   )
 
   // Get the appropriate icon and colors based on decision
@@ -171,6 +199,8 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
         left: 0,
         right: 0,
         bottom: 0,
+        touchAction: "none", // Prevent browser handling of touch gestures
+        willChange: "transform", // Hint to browser to optimize transforms
       }}
       {...(active && !swiped ? bind() : {})}
     >
