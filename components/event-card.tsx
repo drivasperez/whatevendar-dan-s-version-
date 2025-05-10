@@ -288,7 +288,7 @@ export function EventCard({
       enabled: active && !swiped,
       filterTaps: false, // Disable tap filtering for more immediate response
       rubberband: true, // Enable rubberband effect for better feel at edges
-      initial: [0, 0],
+      from: [0, 0],
       bounds: { left: -1000, right: 1000, top: -1000, bottom: 1000 }, // Set large bounds
     },
   )

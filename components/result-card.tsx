@@ -8,7 +8,8 @@ import { X, HelpCircle, Check, ArrowRight, ArrowLeft } from "lucide-react"
 
 interface ResultCardProps {
   decision: "declined" | "maybe" | "maybe-declined"
-  reason: string
+  comment?: string // New field for the snarky comment
+  excuse?: string // New field for the AI-generated excuse
   onDismiss: () => void
   active: boolean
   index: number
@@ -17,7 +18,8 @@ interface ResultCardProps {
 
 export function ResultCard({
   decision,
-  reason,
+  comment, 
+  excuse, 
   onDismiss,
   active,
   index,
@@ -29,6 +31,10 @@ export function ResultCard({
   const [swipeCommitted, setSwipeCommitted] = useState(false) // Track if swipe is committed
   const [swipeProgress, setSwipeProgress] = useState(0) // Track swipe progress (0-1)
 
+  // Use the legacy 'reason' field if excuse/comment aren't provided
+  const displayExcuse = excuse || ""
+  const displayComment = comment || ""
+        
   // Use refs to track the current position and velocity
   const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
   const velocityRef = useRef({ x: 0, y: 0 })
@@ -237,7 +243,7 @@ export function ResultCard({
       enabled: active && !swiped,
       filterTaps: false, // Disable tap filtering for more immediate response
       rubberband: true, // Enable rubberband effect for better feel
-      initial: [0, 0],
+      from: [0, 0],
       bounds: { left: -1000, right: 1000, top: -1000, bottom: 1000 }, // Set large bounds
     },
   )
@@ -377,7 +383,10 @@ export function ResultCard({
           <div className="card-divider"></div>
 
           <div className="description-box w-full">
-            <p className="text-gray-700 italic">"{reason}"</p>
+            {displayComment && (
+              <p className="text-gray-600 font-medium mb-2">{displayComment}</p>
+            )}
+            <p className="text-gray-700 italic">{displayExcuse}</p>
           </div>
         </div>
 

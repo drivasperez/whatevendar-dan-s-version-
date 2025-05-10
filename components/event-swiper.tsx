@@ -8,7 +8,7 @@ import { ConfettiEffect } from "./confetti-effect"
 import { ExcuseBubbles } from "./excuse-bubbles"
 import { useEvents } from "@/context/events-context"
 import type { CalendarEvent } from "@/types/events"
-import { generateExcuse } from "@/lib/excuse-generator"
+import { generateLocalExcuse, generateAIExcuse } from "@/lib/excuse-generator"
 import { Button } from "./ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { RefreshCw } from "lucide-react"
@@ -17,7 +17,7 @@ import { RefreshCw } from "lucide-react"
 type CardInDeck =
   | { type: "event"; event: CalendarEvent }
   | { type: "loading"; decision: "declined" | "maybe" | "maybe-declined" }
-  | { type: "result"; decision: "declined" | "maybe" | "maybe-declined"; reason: string }
+  | { type: "result"; decision: "declined" | "maybe" | "maybe-declined"; comment?: string; excuse: string }
 
 export default function EventSwiper() {
   const { events, addDecision, resetEvents } = useEvents()
@@ -88,7 +88,7 @@ export default function EventSwiper() {
 
   // Handle event card swipe
   const handleEventSwipe = useCallback(
-    (direction: "left" | "right" | "up", event: CalendarEvent) => {
+    async (direction: "left" | "right" | "up", event: CalendarEvent) => {
       // Find the event card and the loading card that follows it
       const eventIndex = cardsInDeck.findIndex((card) => card.type === "event" && card.event.id === event.id)
 
@@ -110,25 +110,33 @@ export default function EventSwiper() {
       if (direction === "left") {
         decision = "declined"
 
-        // Add to decision history
-        const excuse = generateExcuse()
-        addDecision({
-          eventId: event.id,
-          event: event,
-          decision: "declined",
-          reason: excuse,
-          timestamp: new Date().toISOString(),
-        })
-
-        // Update the loading card with the correct decision
+        // Update the loading card
         const newDeck = [...cardsInDeck]
-        newDeck[loadingIndex] = { ...newDeck[loadingIndex], decision }
-
+        if (newDeck[loadingIndex].type === "loading") {
+          newDeck[loadingIndex] = { 
+            type: "loading",
+            decision
+          }
+        }
+        
         // Remove the event card to reveal the loading card
         newDeck.splice(eventIndex, 1)
+        setCardsInDeck(newDeck)
 
-        // After a delay, replace the loading card with a result card
-        setTimeout(() => {
+        try {
+          // Generate an AI excuse
+          const excuse = await generateAIExcuse(event.title, event.type)
+          
+          // Add to decision history with just the AI excuse
+          addDecision({
+            eventId: event.id,
+            event: event,
+            decision: "declined",
+            excuse,
+            timestamp: new Date().toISOString(),
+          })
+
+          // Replace the loading card with a result card
           setCardsInDeck((prev) => {
             const updatedDeck = [...prev]
             const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
@@ -136,38 +144,68 @@ export default function EventSwiper() {
               updatedDeck[loadingCardIndex] = {
                 type: "result",
                 decision,
-                reason: excuse,
+                excuse,
               }
             }
             return updatedDeck
           })
-        }, 1500) // 1.5 second delay to show loading
-
-        setCardsInDeck(newDeck)
+        } catch (error) {
+          console.error("Error generating AI excuse:", error)
+          
+          // Fallback to local excuse generation
+          const excuse = generateLocalExcuse()
+          
+          addDecision({
+            eventId: event.id,
+            event: event,
+            decision: "declined",
+            excuse,
+            timestamp: new Date().toISOString(),
+          })
+          
+          setCardsInDeck((prev) => {
+            const updatedDeck = [...prev]
+            const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
+            if (loadingCardIndex !== -1) {
+              updatedDeck[loadingCardIndex] = {
+                type: "result",
+                decision,
+                excuse,
+              }
+            }
+            return updatedDeck
+          })
+        }
       } else if (direction === "up") {
         decision = "maybe-declined"
 
-        // Add to decision history
-        const excuse = generateExcuse()
-        const reason = "You selected Maybe, but let's be honest, you probably wanted to decline it anyway. " + excuse
-
-        addDecision({
-          eventId: event.id,
-          event: event,
-          decision: "maybe-declined",
-          reason,
-          timestamp: new Date().toISOString(),
-        })
-
-        // Update the loading card with the correct decision
+        // Update the loading card
         const newDeck = [...cardsInDeck]
-        newDeck[loadingIndex] = { ...newDeck[loadingIndex], decision }
-
+        if (newDeck[loadingIndex].type === "loading") {
+          newDeck[loadingIndex] = { 
+            type: "loading",
+            decision
+          }
+        }
+        
         // Remove the event card to reveal the loading card
         newDeck.splice(eventIndex, 1)
+        setCardsInDeck(newDeck)
 
-        // After a delay, replace the loading card with a result card
-        setTimeout(() => {
+        try {
+          // Generate an AI excuse
+          const excuse = await generateAIExcuse(event.title, event.type)
+          
+          // Add to decision history with just the AI excuse
+          addDecision({
+            eventId: event.id,
+            event: event,
+            decision: "maybe-declined",
+            excuse, // Store just the AI excuse without the snarky prefix
+            timestamp: new Date().toISOString(),
+          })
+          
+          // Replace the loading card with a result card
           setCardsInDeck((prev) => {
             const updatedDeck = [...prev]
             const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
@@ -175,14 +213,40 @@ export default function EventSwiper() {
               updatedDeck[loadingCardIndex] = {
                 type: "result",
                 decision,
-                reason,
+                comment: "You selected Maybe, but let's be honest, you probably wanted to decline it anyway.",
+                excuse,
               }
             }
             return updatedDeck
           })
-        }, 1500) // 1.5 second delay to show loading
-
-        setCardsInDeck(newDeck)
+        } catch (error) {
+          console.error("Error generating AI excuse:", error)
+          
+          // Fallback to local excuse generation
+          const excuse = generateLocalExcuse()
+          
+          addDecision({
+            eventId: event.id,
+            event: event,
+            decision: "maybe-declined",
+            excuse, // Store just the excuse without the snarky prefix
+            timestamp: new Date().toISOString(),
+          })
+          
+          setCardsInDeck((prev) => {
+            const updatedDeck = [...prev]
+            const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
+            if (loadingCardIndex !== -1) {
+              updatedDeck[loadingCardIndex] = {
+                type: "result",
+                decision,
+                comment: "You selected Maybe, but let's be honest, you probably wanted to decline it anyway.",
+                excuse,
+              }
+            }
+            return updatedDeck
+          })
+        }
       } else if (direction === "right") {
         // For right swipe, show dialog
         setCurrentEvent(event)
@@ -219,23 +283,14 @@ export default function EventSwiper() {
     })
   }, [])
 
-  const handleDialogContinue = () => {
+  const handleDialogContinue = async () => {
     if (dialogAttempt < 4) {
       // Increment attempt counter
       setDialogAttempt((prev) => prev + 1)
     } else {
       // On 5th attempt, mark as maybe and close dialog
       if (currentEvent) {
-        const reason = "After much convincing, you tentatively agreed to attend."
         const decision = "maybe"
-
-        addDecision({
-          eventId: currentEvent.id,
-          event: currentEvent,
-          decision,
-          reason,
-          timestamp: new Date().toISOString(),
-        })
 
         // Find the event card and the loading card that follows it
         const eventIndex = cardsInDeck.findIndex((card) => card.type === "event" && card.event.id === currentEvent.id)
@@ -245,15 +300,35 @@ export default function EventSwiper() {
 
           // Make sure the loading card exists
           if (loadingIndex < cardsInDeck.length && cardsInDeck[loadingIndex].type === "loading") {
-            // Update the loading card with the correct decision
+            // Update the loading card
             const newDeck = [...cardsInDeck]
-            newDeck[loadingIndex] = { ...newDeck[loadingIndex], decision }
+            if (newDeck[loadingIndex].type === "loading") {
+              newDeck[loadingIndex] = { 
+                type: "loading",
+                decision
+              }
+            }
 
             // Remove the event card to reveal the loading card
             newDeck.splice(eventIndex, 1)
+            setCardsInDeck(newDeck)
+            
+            const comment = "After much convincing, you tentatively agreed to attend."
+            
+            // Add to decision history
+            addDecision({
+              eventId: currentEvent.id,
+              event: currentEvent,
+              decision,
+              comment,
+              excuse: undefined,
+              timestamp: new Date().toISOString(),
+            })
 
-            // After a delay, replace the loading card with a result card
-            setTimeout(() => {
+            // After a brief delay, replace the loading card with a result card
+            setTimeout(async () => {
+              const excuse = await generateAIExcuse(currentEvent.title, currentEvent.type)
+              
               setCardsInDeck((prev) => {
                 const updatedDeck = [...prev]
                 const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
@@ -261,14 +336,13 @@ export default function EventSwiper() {
                   updatedDeck[loadingCardIndex] = {
                     type: "result",
                     decision,
-                    reason,
+                    comment: "You made the right choice!",
+                    excuse
                   }
                 }
                 return updatedDeck
               })
-            }, 1500) // 1.5 second delay to show loading
-
-            setCardsInDeck(newDeck)
+            }, 1000) // Brief delay to show loading
           }
         }
       }
@@ -279,20 +353,10 @@ export default function EventSwiper() {
     }
   }
 
-  const handleDialogCancel = () => {
+  const handleDialogCancel = async () => {
     // User gives up trying to accept
     if (currentEvent) {
-      const excuse = generateExcuse()
-      const reason = "You made the right choice! " + excuse
       const decision = "declined"
-
-      addDecision({
-        eventId: currentEvent.id,
-        event: currentEvent,
-        decision,
-        reason,
-        timestamp: new Date().toISOString(),
-      })
 
       // Find the event card and the loading card that follows it
       const eventIndex = cardsInDeck.findIndex((card) => card.type === "event" && card.event.id === currentEvent.id)
@@ -302,15 +366,33 @@ export default function EventSwiper() {
 
         // Make sure the loading card exists
         if (loadingIndex < cardsInDeck.length && cardsInDeck[loadingIndex].type === "loading") {
-          // Update the loading card with the correct decision
+          // Update the loading card
           const newDeck = [...cardsInDeck]
-          newDeck[loadingIndex] = { ...newDeck[loadingIndex], decision }
+          if (newDeck[loadingIndex].type === "loading") {
+            newDeck[loadingIndex] = { 
+              type: "loading",
+              decision
+            }
+          }
 
           // Remove the event card to reveal the loading card
           newDeck.splice(eventIndex, 1)
+          setCardsInDeck(newDeck)
+          
+          try {
+            // Generate an AI excuse
+            const excuse = await generateAIExcuse(currentEvent.title, currentEvent.type)
+            
+            // Add to decision history with just the AI excuse
+            addDecision({
+              eventId: currentEvent.id,
+              event: currentEvent,
+              decision,
+              excuse,
+              timestamp: new Date().toISOString(),
+            })
 
-          // After a delay, replace the loading card with a result card
-          setTimeout(() => {
+            // Replace the loading card with a result card
             setCardsInDeck((prev) => {
               const updatedDeck = [...prev]
               const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
@@ -318,14 +400,40 @@ export default function EventSwiper() {
                 updatedDeck[loadingCardIndex] = {
                   type: "result",
                   decision,
-                  reason,
+                  comment: "You made the right choice!",
+                  excuse,
                 }
               }
               return updatedDeck
             })
-          }, 1500) // 1.5 second delay to show loading
-
-          setCardsInDeck(newDeck)
+          } catch (error) {
+            console.error("Error generating AI excuse:", error)
+            
+            // Fallback to local excuse generation
+            const excuse = generateLocalExcuse()
+            
+            addDecision({
+              eventId: currentEvent.id,
+              event: currentEvent,
+              decision,
+              excuse,
+              timestamp: new Date().toISOString(),
+            })
+            
+            setCardsInDeck((prev) => {
+              const updatedDeck = [...prev]
+              const loadingCardIndex = updatedDeck.findIndex((card) => card.type === "loading")
+              if (loadingCardIndex !== -1) {
+                updatedDeck[loadingCardIndex] = {
+                  type: "result",
+                  decision,
+                  comment: "You made the right choice!",
+                  excuse,
+                }
+              }
+              return updatedDeck
+            })
+          }
         }
       }
     }
@@ -442,7 +550,8 @@ export default function EventSwiper() {
               <ResultCard
                 key={`result-${index}`}
                 decision={card.decision}
-                reason={card.reason}
+                comment={card.comment}
+                excuse={card.excuse}
                 onDismiss={handleResultDismiss}
                 active={isActive}
                 index={index}
