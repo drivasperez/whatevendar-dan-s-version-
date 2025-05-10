@@ -24,7 +24,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "SwipeTime",
   description: "A silly productivity app for managing your calendar events",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
