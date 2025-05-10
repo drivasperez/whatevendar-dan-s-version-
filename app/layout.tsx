@@ -24,7 +24,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "SwipeTime",
+  title: "Whatevendar",
   description: "A silly productivity app for managing your calendar events",
   generator: "v0.dev",
 }
