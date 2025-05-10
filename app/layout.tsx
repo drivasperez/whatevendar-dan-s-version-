@@ -1,12 +1,25 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Outfit } from "next/font/google"
+import { Old_Standard_TT, Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/navbar"
 import { Toaster } from "@/components/ui/toaster"
 import { EventsProvider } from "@/context/events-context"
 
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" })
+// Load Old Standard TT font
+const oldStandard = Old_Standard_TT({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-old-standard",
+  display: "swap",
+})
+
+// Load Inter font
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "SwipeTime",
@@ -20,8 +33,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={outfit.className}>
+    <html lang="en" className={`${oldStandard.variable} ${inter.variable}`}>
+      <body className={inter.className}>
         <EventsProvider>
           <div className="relative h-screen overflow-hidden">
             <Navbar />

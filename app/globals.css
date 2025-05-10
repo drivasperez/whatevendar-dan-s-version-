@@ -34,6 +34,15 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Font utility classes */
+  .font-old-standard {
+    font-family: var(--font-old-standard);
+  }
+
+  .font-inter {
+    font-family: var(--font-inter);
+  }
 }
 
 /* Animated background gradient */
@@ -89,7 +98,7 @@
   touch-action: none;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   border-radius: var(--radius); /* Add border radius to the outer container */
-  overflow: hidden; /* Ensure content doesn't overflow rounded corners */
+  overflow: visible; /* Allow content to overflow for bubbles */
 }
 
 /* Ensure all cards have the same dimensions */
@@ -111,6 +120,7 @@
 }
 
 .swipe-card-content h3 {
+  font-family: var(--font-old-standard);
   font-weight: 700;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, #333 0%, #000 100%);
@@ -368,4 +378,15 @@ h6 {
   border-radius: 1.5px;
   background: linear-gradient(90deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.5), rgba(168, 85, 247, 0.2));
   margin: 1rem 0;
+}
+
+/* Enhanced bubble shadow for depth */
+.bubble-shadow {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Title styling with Old Standard font */
+.title-serif {
+  font-family: var(--font-old-standard);
+  font-weight: 700;
 }

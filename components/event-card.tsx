@@ -6,6 +6,7 @@ import { useDrag } from "@use-gesture/react"
 import type { CalendarEvent } from "@/types/events"
 import { cn } from "@/lib/utils"
 import { Calendar, Clock, MapPin, Check, X, HelpCircle } from "lucide-react"
+import { ExcuseBubbles } from "./excuse-bubbles"
 
 interface EventCardProps {
   event: CalendarEvent
@@ -156,7 +157,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
       enabled: active && !swiped,
       filterTaps: false, // Disable tap filtering for more immediate response
       rubberband: false, // Disable rubberband effect for direct control
-      from: [0, 0],
+      initial: [0, 0],
       bounds: { left: -1000, right: 1000, top: -1000, bottom: 1000 }, // Set large bounds
     },
   )
@@ -198,7 +199,13 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
       }}
       {...(active && !swiped ? bind() : {})}
     >
-      <div className={cn("swipe-card-content", "glass-card", "flex flex-col justify-between shadow-lg")}>
+      {/* Add the ExcuseBubbles component */}
+      <ExcuseBubbles active={active && !swiped} />
+
+      <div
+        className={cn("swipe-card-content", "glass-card", "flex flex-col justify-between shadow-lg")}
+        style={{ position: "relative", zIndex: 1 }} // Ensure card content is above bubbles
+      >
         {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div
@@ -245,7 +252,7 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
           <span className="event-type-badge">{event.type}</span>
         </div>
 
-        <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
+        <h3 className="text-2xl font-bold mb-2 font-old-standard">{event.title}</h3>
 
         <div className="card-divider"></div>
 
