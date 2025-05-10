@@ -39,13 +39,7 @@ The excuse should be:
 
 If the context mentions specifics about the event (like duration, description, or type), weave those details into your excuse to make it perfectly tailored to that exact situation.
 
-And here are some example excuses to give you a sense of the vibe:
-- "My keyboard achieved sentience and decided to unionize right in the middle of our standups."
-- "My flat's wifi is being throttled by the collective judgment of all my unfinished side projects."
-- "I tried updating my calendar but accidentally deployed it to production and caused a minor incident."
-- "I was busy explaining to my nan that no, turning the router off and on again won't fix her arthritis."
-
-Just provide the excuse directly without any introductory text or explanation. Make it dry, witty, and very British.`
+Just provide the excuse directly without any introductory text or explanation..`
           }
         ]
       })
