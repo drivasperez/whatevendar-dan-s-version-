@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
             content: `Generate a deadpan, sarcastic, and hilarious excuse for ${context || 'why I am late'}. 
 
 The excuse should be:
+<<<<<<< Updated upstream
 1. Dry, self-deprecating, and quintessentially British in tone
+=======
+1. Dry, self-deprecating
+>>>>>>> Stashed changes
 2. Short, punchy (1 sentence maximum, no more than 20 words) and pithy
 3. Tailored specifically to the context (reference the event details like duration and description when available)
 4. Contain tech-related references when appropriate
@@ -40,13 +44,7 @@ The excuse should be:
 
 If the context mentions specifics about the event (like duration, description, or type), weave those details into your excuse to make it perfectly tailored to that exact situation.
 
-And here are some example excuses to give you a sense of the vibe:
-- "My keyboard achieved sentience and decided to unionize right in the middle of our standups."
-- "My flat's wifi is being throttled by the collective judgment of all my unfinished side projects."
-- "I tried updating my calendar but accidentally deployed it to production and caused a minor incident."
-- "I was busy explaining to my nan that no, turning the router off and on again won't fix her arthritis."
-
-Just provide the excuse directly without any introductory text or explanation. Make it dry, witty, and very British.`
+Just provide the excuse directly without any introductory text or explanation..`
           }
         ]
       })
