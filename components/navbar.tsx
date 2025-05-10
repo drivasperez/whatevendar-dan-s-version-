@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Calendar, ClockIcon, History } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { CalendarAuth } from "./calendar-auth"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -24,6 +25,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            <CalendarAuth />
             <Link
               href="/"
               className={cn(
