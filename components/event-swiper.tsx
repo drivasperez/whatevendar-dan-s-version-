@@ -20,7 +20,7 @@ type CardInDeck =
   | { type: "result"; decision: "declined" | "maybe" | "maybe-declined"; reason: string }
 
 export default function EventSwiper() {
-  const { events, addDecision, resetEvents } = useEvents()
+  const { events, addDecision, resetEvents, isLoading, error } = useEvents()
   const [showDialog, setShowDialog] = useState(false)
   const [dialogAttempt, setDialogAttempt] = useState(0)
   const [currentEvent, setCurrentEvent] = useState<CalendarEvent | null>(null)
@@ -382,6 +382,34 @@ export default function EventSwiper() {
       return () => clearTimeout(timer)
     }
   }, [shouldBounceNextCard])
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[500px] flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
+        <div className="text-6xl mb-4">⏳</div>
+        <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300">Loading Events...</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-center mt-2">
+          Please wait while we fetch your calendar events.
+        </p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-[500px] flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
+        <div className="text-6xl mb-4">⚠️</div>
+        <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300">Error Loading Events</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-center mt-2 mb-6">
+          {error}
+        </p>
+        <Button onClick={resetEvents} className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Try Again
+        </Button>
+      </div>
+    )
+  }
 
   if (noMoreEvents) {
     return (

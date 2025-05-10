@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
 import type { CalendarEvent, EventDecision } from "@/types/events"
-import { generateTestEvents } from "@/lib/mock-data"
 
 interface EventsContextType {
   events: CalendarEvent[]
@@ -10,6 +9,8 @@ interface EventsContextType {
   addDecision: (decision: EventDecision) => void
   clearDecisions: () => void
   resetEvents: () => void
+  isLoading: boolean
+  error: string | null
 }
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined)
@@ -17,11 +18,35 @@ const EventsContext = createContext<EventsContextType | undefined>(undefined)
 export function EventsProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [decisions, setDecisions] = useState<EventDecision[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // Load mock events on mount
+  // Load events from Google Calendar
+  const fetchEvents = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/calendar/events')
+      if (!response.ok) {
+        if (response.status === 401) {
+          setError('Please connect your Google Calendar first')
+          return
+        }
+        throw new Error('Failed to fetch events')
+      }
+      const data = await response.json()
+      setEvents(data.events || [])
+    } catch (e) {
+      console.error('Failed to fetch events:', e)
+      setError('Failed to load events. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // Load events on mount
   useEffect(() => {
-    // Use the test events for more consistent dates
-    setEvents(generateTestEvents())
+    fetchEvents()
 
     // Load decisions from localStorage if available
     const savedDecisions = localStorage.getItem("eventDecisions")
@@ -32,7 +57,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
         console.error("Failed to parse saved decisions", e)
       }
     }
-  }, [])
+  }, [fetchEvents])
 
   // Save decisions to localStorage when they change
   useEffect(() => {
@@ -55,13 +80,13 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("eventDecisions")
   }, [])
 
-  // Reset events for testing
+  // Reset events by fetching them again
   const resetEvents = useCallback(() => {
-    setEvents(generateTestEvents())
-  }, [])
+    fetchEvents()
+  }, [fetchEvents])
 
   return (
-    <EventsContext.Provider value={{ events, decisions, addDecision, clearDecisions, resetEvents }}>
+    <EventsContext.Provider value={{ events, decisions, addDecision, clearDecisions, resetEvents, isLoading, error }}>
       {children}
     </EventsContext.Provider>
   )

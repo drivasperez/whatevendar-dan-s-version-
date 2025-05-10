@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useSearchParams } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import { useEvents } from '@/context/events-context'
+import { Calendar } from 'lucide-react'
 
 export function CalendarAuth() {
   const [authUrl, setAuthUrl] = useState<string | null>(null)
@@ -91,19 +92,22 @@ export function CalendarAuth() {
   }
 
   if (isLoading) {
-    return <Button disabled>Connecting to Calendar...</Button>
+    return <Button size="sm" variant="outline" disabled>Connecting...</Button>
   }
 
   if (!authUrl) {
-    return <Button disabled>Loading...</Button>
+    return <Button size="sm" variant="outline" disabled>Loading...</Button>
   }
 
   return (
     <Button
       onClick={handleConnect}
-      className="w-full"
+      size="sm"
+      variant="outline"
+      className="inline-flex items-center"
     >
-      Connect Google Calendar
+      <Calendar className="h-4 w-4 mr-1" />
+      <span className="hidden sm:inline">Connect Calendar</span>
     </Button>
   )
 }

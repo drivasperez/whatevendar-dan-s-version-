@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 import EventSwiper from "@/components/event-swiper"
-import { CalendarAuth } from "@/components/calendar-auth"
 import { LoadingEvents } from "@/components/loading"
 import { TestControls } from "@/components/test-controls"
 
