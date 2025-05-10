@@ -1,4 +1,4 @@
-// Silly excuse generator
+// Excuse generator with Claude AI integration
 
 const excuseStarters = [
   "Sorry, I can't make it because",
@@ -36,8 +36,34 @@ const sillyExcuses = [
   "I'm scheduled for an emergency nap that cannot be rescheduled",
 ]
 
-export function generateExcuse(): string {
+// Generate a fallback excuse locally in case the API call fails
+export function generateLocalExcuse(): string {
   const starter = excuseStarters[Math.floor(Math.random() * excuseStarters.length)]
   const excuse = sillyExcuses[Math.floor(Math.random() * sillyExcuses.length)]
   return `${starter} ${excuse}.`
+}
+
+// Generate an excuse using the Claude API
+export async function generateAIExcuse(eventTitle: string, eventType: string): Promise<string> {
+  try {
+    const context = `missing "${eventTitle}" (a ${eventType} event)`
+    
+    const response = await fetch('/api/generate-excuse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ context }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate AI excuse');
+    }
+
+    const data = await response.json();
+    return data.excuse;
+  } catch (error) {
+    console.error('Error generating AI excuse:', error);
+    return generateLocalExcuse();
+  }
 }
