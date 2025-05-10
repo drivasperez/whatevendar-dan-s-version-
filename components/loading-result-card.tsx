@@ -204,35 +204,35 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
           "flex flex-col justify-between shadow-lg",
         )}
       >
+        {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div
             className="swipe-indicator-item swipe-indicator-left"
             style={{
-              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
               opacity: swipeDirection === "left" ? 1 : 0,
+              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
             }}
           >
-            <ArrowRight className="h-4 w-4 mr-1" />
-            <span>Skip</span>
+            <div className="indicator-icon continue-icon">
+              <ArrowRight className="h-5 w-5 text-white" />
+            </div>
           </div>
+
           <div
             className="swipe-indicator-item swipe-indicator-right"
             style={{
-              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
               opacity: swipeDirection === "right" ? 1 : 0,
+              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
             }}
           >
-            <ArrowRight className="h-4 w-4 mr-1" />
-            <span>Skip</span>
+            <div className="indicator-icon continue-icon">
+              <ArrowRight className="h-5 w-5 text-white" />
+            </div>
           </div>
         </div>
 
         <div className="mb-4">
-          <span
-            className={cn("inline-block px-3 py-1 rounded-full text-xs font-medium", styles.bgColor, styles.textColor)}
-          >
-            Processing
-          </span>
+          <span className="event-type-badge">Processing</span>
         </div>
 
         <div className="flex flex-col items-center justify-center flex-grow">
@@ -248,12 +248,13 @@ export function LoadingResultCard({ decision, onDismiss, active, index }: Loadin
               🤔
             </span>
           </animated.div>
+
+          <div className="card-divider"></div>
+
           <p className={cn("text-lg font-medium mb-2", styles.textColor)}>Thinking of an excuse...</p>
         </div>
 
-        <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-          Please wait while I come up with something creative
-        </div>
+        <div className="swipe-instructions">Please wait while I come up with something creative</div>
       </div>
     </animated.div>
   )

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import { cn } from "@/lib/utils"
-import { X, HelpCircle, Check, ArrowRight } from "lucide-react"
+import { X, HelpCircle, Check, ArrowRight, ArrowLeft } from "lucide-react"
 import { useTheme } from "next-themes"
 
 interface ResultCardProps {
@@ -227,44 +227,49 @@ export function ResultCard({ decision, reason, onDismiss, active, index }: Resul
           "flex flex-col justify-between shadow-lg",
         )}
       >
+        {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div
             className="swipe-indicator-item swipe-indicator-left"
             style={{
-              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
               opacity: swipeDirection === "left" ? 1 : 0,
+              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
             }}
           >
-            <ArrowRight className="h-4 w-4 mr-1" />
-            <span>Continue</span>
+            <div className="indicator-icon continue-icon">
+              <ArrowLeft className="h-5 w-5 text-white" />
+            </div>
           </div>
+
           <div
             className="swipe-indicator-item swipe-indicator-right"
             style={{
-              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
               opacity: swipeDirection === "right" ? 1 : 0,
+              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
             }}
           >
-            <ArrowRight className="h-4 w-4 mr-1" />
-            <span>Continue</span>
+            <div className="indicator-icon continue-icon">
+              <ArrowRight className="h-5 w-5 text-white" />
+            </div>
           </div>
         </div>
 
         <div className="mb-4">
-          <span className={cn("inline-block px-3 py-1 rounded-full text-xs font-medium", badge.bg, badge.text)}>
-            {badge.label}
-          </span>
+          <span className={cn("event-type-badge", badge.text)}>{badge.label}</span>
         </div>
 
         <div className="flex flex-col items-center justify-center flex-grow">
-          <div className={cn("rounded-full p-4 mb-4", bgColor)}>{icon}</div>
+          <div className={cn("rounded-full p-4 mb-4 shadow-lg", bgColor)}>{icon}</div>
           <h3 className="text-2xl font-bold mb-3">{title}</h3>
-          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg w-full">
+
+          <div className="card-divider"></div>
+
+          <div className="description-box w-full">
             <p className="text-gray-700 dark:text-gray-300 italic">"{reason}"</p>
           </div>
         </div>
 
-        <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">Swipe in any direction to continue</div>
+        <div className="swipe-instructions">Swipe in any direction to continue</div>
       </div>
     </animated.div>
   )

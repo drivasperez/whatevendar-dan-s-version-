@@ -208,69 +208,86 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
           "flex flex-col justify-between shadow-lg",
         )}
       >
+        {/* New indicator design positioned at top corners */}
         <div className="swipe-indicator">
           <div
             className="swipe-indicator-item swipe-indicator-left"
             style={{
-              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
               opacity: swipeDirection === "left" ? 1 : 0,
+              transform: `scale(${getIndicatorScale("left", swipeDirection === "left" ? positionRef.current.x : 0)})`,
             }}
           >
-            <X className="h-4 w-4 mr-1" />
-            <span>Decline</span>
+            <div className="indicator-icon decline-icon">
+              <X className="h-5 w-5 text-white" />
+            </div>
           </div>
+
           <div
             className="swipe-indicator-item swipe-indicator-up"
             style={{
-              transform: `scale(${getIndicatorScale("up", swipeDirection === "up" ? positionRef.current.y : 0)})`,
               opacity: swipeDirection === "up" ? 1 : 0,
+              transform: `translateX(-50%) scale(${getIndicatorScale(
+                "up",
+                swipeDirection === "up" ? positionRef.current.y : 0,
+              )})`,
             }}
           >
-            <HelpCircle className="h-4 w-4 mr-1" />
-            <span>Maybe</span>
+            <div className="indicator-icon maybe-icon">
+              <HelpCircle className="h-5 w-5 text-white" />
+            </div>
           </div>
+
           <div
             className="swipe-indicator-item swipe-indicator-right"
             style={{
-              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
               opacity: swipeDirection === "right" ? 1 : 0,
+              transform: `scale(${getIndicatorScale("right", swipeDirection === "right" ? positionRef.current.x : 0)})`,
             }}
           >
-            <Check className="h-4 w-4 mr-1" />
-            <span>Accept</span>
+            <div className="indicator-icon accept-icon">
+              <Check className="h-5 w-5 text-white" />
+            </div>
           </div>
         </div>
 
         <div className="mb-4">
-          <span className="inline-block px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 text-xs font-medium">
-            {event.type}
-          </span>
+          <span className="event-type-badge">{event.type}</span>
         </div>
 
         <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
 
-        <div className="space-y-3 mb-6">
-          <div className="flex items-center justify-center gap-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
+        <div className="card-divider"></div>
+
+        <div className="grid grid-cols-1 gap-2 mb-6 w-full">
+          <div className="info-item">
+            <div className="info-item-icon">
+              <Calendar className="h-4 w-4" />
+            </div>
             <span className="text-gray-700 dark:text-gray-300">{formattedDate}</span>
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <Clock className="h-4 w-4 text-gray-500" />
+          <div className="info-item">
+            <div className="info-item-icon">
+              <Clock className="h-4 w-4" />
+            </div>
             <span className="text-gray-700 dark:text-gray-300">{formattedTime}</span>
           </div>
           {event.location && (
-            <div className="flex items-center justify-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-500" />
+            <div className="info-item">
+              <div className="info-item-icon">
+                <MapPin className="h-4 w-4" />
+              </div>
               <span className="text-gray-700 dark:text-gray-300">{event.location}</span>
             </div>
           )}
         </div>
 
-        <p className="text-gray-600 dark:text-gray-400 text-sm">{event.description || "No description provided"}</p>
+        {event.description && (
+          <div className="description-box mb-4">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">{event.description}</p>
+          </div>
+        )}
 
-        <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-          Swipe left to decline, right to accept, or up for maybe
-        </div>
+        <div className="swipe-instructions">Swipe left to decline, right to accept, or up for maybe</div>
       </div>
     </animated.div>
   )
