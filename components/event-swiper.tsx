@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { EventCard } from "./event-card"
 import { ResultCard } from "./result-card"
 import { LoadingResultCard } from "./loading-result-card"
@@ -27,9 +27,13 @@ export default function EventSwiper() {
   const [noMoreEvents, setNoMoreEvents] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [showBubbles, setShowBubbles] = useState(false)
+  const [shouldBounceNextCard, setShouldBounceNextCard] = useState(false)
 
   // Track all cards in the deck (events, loading, and results)
   const [cardsInDeck, setCardsInDeck] = useState<CardInDeck[]>([])
+
+  // Ref to track if this is the first render
+  const isFirstRender = useRef(true)
 
   // Initialize the deck with event cards and loading cards
   useEffect(() => {
@@ -49,6 +53,11 @@ export default function EventSwiper() {
         })
         setCardsInDeck(newDeck)
       }
+    }
+
+    // After initial render, set isFirstRender to false
+    if (isFirstRender.current) {
+      isFirstRender.current = false
     }
   }, [events, cardsInDeck.length])
 
@@ -186,6 +195,9 @@ export default function EventSwiper() {
 
   // Handle result card dismissal
   const handleResultDismiss = useCallback(() => {
+    // Set the bounce flag for the next card
+    setShouldBounceNextCard(true)
+
     setCardsInDeck((prev) => {
       const newDeck = [...prev]
       // Remove the first card (the result card)
@@ -196,6 +208,9 @@ export default function EventSwiper() {
 
   // Handle loading card dismissal (if user swipes it away before it changes to result)
   const handleLoadingDismiss = useCallback(() => {
+    // Set the bounce flag for the next card
+    setShouldBounceNextCard(true)
+
     setCardsInDeck((prev) => {
       const newDeck = [...prev]
       // Remove the first card (the loading card)
@@ -358,6 +373,16 @@ export default function EventSwiper() {
     setShowConfetti(false)
   }
 
+  // Reset the bounce flag after a short delay
+  useEffect(() => {
+    if (shouldBounceNextCard) {
+      const timer = setTimeout(() => {
+        setShouldBounceNextCard(false)
+      }, 0) // Reduced from 500ms to 100ms for faster reset
+      return () => clearTimeout(timer)
+    }
+  }, [shouldBounceNextCard])
+
   if (noMoreEvents) {
     return (
       <>
@@ -397,6 +422,7 @@ export default function EventSwiper() {
                 onSwipe={handleEventSwipe}
                 active={isActive}
                 index={index}
+                shouldBounce={isActive && shouldBounceNextCard && !isFirstRender.current}
               />
             )
           } else if (card.type === "loading") {

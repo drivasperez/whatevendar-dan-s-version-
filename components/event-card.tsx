@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { animated, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import type { CalendarEvent } from "@/types/events"
@@ -12,11 +12,13 @@ interface EventCardProps {
   onSwipe: (direction: "left" | "right" | "up", event: CalendarEvent) => void
   active: boolean
   index: number
+  shouldBounce?: boolean
 }
 
-export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
+export function EventCard({ event, onSwipe, active, index, shouldBounce = false }: EventCardProps) {
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | "up" | null>(null)
   const [swiped, setSwiped] = useState(false)
+  const [hasBounced, setHasBounced] = useState(false)
 
   // Use a ref to track the current position directly
   const positionRef = useRef({ x: 0, y: 0, rotation: 0 })
@@ -53,6 +55,37 @@ export function EventCard({ event, onSwipe, active, index }: EventCardProps) {
     // Use a more responsive config for immediate feedback
     config: { tension: 800, friction: 15, mass: 0.1 },
   }))
+
+  // Apply bounce animation when a card becomes active
+  useEffect(() => {
+    if (active && shouldBounce && !hasBounced) {
+      // Start with a slight scale down
+      api.start({
+        scale: 0.95,
+        config: { tension: 300, friction: 10 },
+        immediate: true,
+      })
+
+      // Then bounce up with a spring effect immediately
+      // Removed the setTimeout delay to make it faster
+      api.start({
+        scale: 1,
+        config: {
+          tension: 800, // Increased tension for faster animation
+          friction: 8, // Reduced friction for faster bounce
+          mass: 0.5, // Reduced mass for quicker movement
+        },
+      })
+      setHasBounced(true)
+    } else if (!active) {
+      // Reset bounce state when card becomes inactive
+      setHasBounced(false)
+      api.start({
+        scale: 0.9,
+        config: { tension: 800, friction: 15, mass: 0.1 },
+      })
+    }
+  }, [active, shouldBounce, hasBounced, api])
 
   // Set up drag gesture with direct position updates
   const bind = useDrag(
