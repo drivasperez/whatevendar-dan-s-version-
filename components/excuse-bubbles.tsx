@@ -104,6 +104,7 @@ function AnimatedBubble({
     <animated.div
       className={`fixed px-4 py-2.5 rounded-2xl text-sm font-medium text-gray-800 whitespace-nowrap pearlescent-bubble ${colorClass}`}
       style={{
+        userSelect: 'none',
         opacity: props.opacity,
         transform: props.scale.to((s) => `scale(${s}) rotate(${props.rotate.get()}deg)`),
         left: position.x,

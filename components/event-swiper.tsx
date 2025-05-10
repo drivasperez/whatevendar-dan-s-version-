@@ -423,6 +423,7 @@ export default function EventSwiper() {
                 active={isActive}
                 index={index}
                 shouldBounce={isActive && shouldBounceNextCard && !isFirstRender.current}
+                xThreshold={100} // Add configurable threshold
               />
             )
           } else if (card.type === "loading") {
@@ -433,6 +434,7 @@ export default function EventSwiper() {
                 onDismiss={handleLoadingDismiss}
                 active={isActive}
                 index={index}
+                xThreshold={50} // Add configurable threshold
               />
             )
           } else {
@@ -444,6 +446,7 @@ export default function EventSwiper() {
                 onDismiss={handleResultDismiss}
                 active={isActive}
                 index={index}
+                xThreshold={50} // Add configurable threshold
               />
             )
           }
